@@ -1,0 +1,63 @@
+/*Index*/
+:root {
+    --primary: #6c5ce7; /* Un violet/bleu électrique plus moderne */
+    --secondary: #a29bfe;
+    --dark: #0f172a;    /* Un bleu très sombre, presque noir, pour le header */
+    --text: #1e293b;
+    --light: #f8fafc;
+    --border: #e2e8f0;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
+    margin: 0;
+    background: var(--light);
+    color: var(--text);
+    line-height: 1.6;
+}
+
+header {
+    background: var(--dark);
+    color: white;
+    padding: 1.5rem 10%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid var(--primary);
+}
+
+header h1 {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+nav a {
+    color: #cbd5e1;
+    text-decoration: none;
+    margin-left: 25px;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: var(--primary);
+}
+
+footer {
+    background: var(--dark);
+    padding: 40px;
+    border-top: 1px solid #1e293b;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    text-align: center;
+}
+
+main {
+    max-width: 1200px; 
+    margin: 40px auto; 
+    padding: 0 20px; 
+    min-height: 70vh; 
+}
+
