@@ -15,8 +15,20 @@
 if (isset($_POST['submit'])){
     $connection = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
     $marque = $_POST['marque'];
-    $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE marque LIKE '%$marque%'";
+    $page = $_POST['subpage'] ?? 1;
+    if ($page < 1) {
+        $page = 1;
+    }
+    $limit = 4;
+    $offset = ($page - 1) * $limit;
+
+    $sql = "SELECT * 
+    FROM base_de_donn__e___harmytech___feuille_1 
+    WHERE marque LIKE '%$marque%'
+    ORDER BY id
+    LIMIT $limit OFFSET $offset";
     $result = $connection->query($sql);
+    
     
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
