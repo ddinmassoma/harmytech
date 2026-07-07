@@ -1,4 +1,4 @@
-<form action="" method="post">
+<form action="" method="get">
 		<input
 			type="text"
 			placeholder="Entrez le nom du produit"
@@ -8,9 +8,9 @@
 </form>
 
 <?php
-    if (isset($_POST['submit'])) {
+    if (isset($_GET['submit'])) {
         $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-        $searchString = mysqli_real_escape_string($connection_string, trim(htmlentities($_POST['search'])));
+        $searchString = mysqli_real_escape_string($connection_string, trim(htmlentities($_GET['search'])));
         $page = isset($_GET['subpage']) ? (int)$_GET['subpage'] : 1;
         if ($page < 1) {
             $page = 1;
@@ -24,7 +24,11 @@
         }
         
         $searchString = "%$searchString%";
-        $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE nom LIKE ? LIMIT $limit OFFSET $offset";
+        $sql = "SELECT * 
+                FROM base_de_donn__e___harmytech___feuille_1 
+                WHERE nom LIKE ? 
+                ORDER BY id
+                LIMIT $limit OFFSET $offset";
         $prepared_stmt = $connection_string->prepare($sql);
         $prepared_stmt->bind_param('s', $searchString);
         $prepared_stmt->execute();
@@ -49,9 +53,11 @@
         $totalPages = ceil($totalArticles / $limit);
         for ($i = 1; $i <= $totalPages; $i++) {
             if ($i == $page) {
+                echo ' ';
                 echo '<strong>' . $i . '</strong> ';
             } else {
-                echo '<a href="index.php?page=accueil&subpage=' . $i . '">' . $i . '</a> ';
+                echo ' ';
+                echo '<a href="index.php?page=accueil&search=' .urlencode($_GET['search']) .'&submit=Rechercher&subpage=' . $i .'">' . $i .'</a>';
             }
         }
     }
