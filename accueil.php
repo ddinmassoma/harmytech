@@ -10,12 +10,12 @@
 <?php
     if (isset($_GET['submit'])) {
         $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-        $searchString = mysqli_real_escape_string($connection_string, trim(htmlentities($_GET['search'])));
+        $searchString = mysqli_real_escape_string($connection_string, trim(htmlentities($_GET['search'] ?? '')));
         $page = isset($_GET['subpage']) ? (int)$_GET['subpage'] : 1;
         if ($page < 1) {
             $page = 1;
         }
-        $limit = 5;
+        $limit = 4;
         $offset = ($page - 1) * $limit;
 
         if ($connection_string->connect_error) {
