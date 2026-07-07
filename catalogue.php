@@ -43,5 +43,17 @@ if (isset($_POST['submit'])){
     } else {
         echo "Aucun produit trouvé pour cette marque.";
     }
+
+    $totalArticles = $connection->query("SELECT COUNT(*) FROM base_de_donn__e___harmytech___feuille_1 WHERE marque LIKE '%$marque%'")->fetch_row()[0];
+        $totalPages = ceil($totalArticles / $limit);
+        for ($i = 1; $i <= $totalPages; $i++) {
+            if ($i == $page) {
+                echo ' ';
+                echo '<strong>' . $i . '</strong> ';
+            } else {
+                echo ' ';
+                echo '<a href="index.php?page=catalogue&subpage=' . $i .'">' . $i .'</a>';
+            }
+        }
 }
 
