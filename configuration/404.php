@@ -1,7 +1,7 @@
 <body>
     <div class="container">
         <div class="icon">💻</div>
-        <h1>404</h1>
+        <h1 class="error-code">404</h1>
         <h2>Oups… page introuvable</h2>
         <p>
             La page que vous recherchez n'existe pas ou a été déplacée.<br>
@@ -28,7 +28,7 @@
             text-align: center;
         }
 
-        h1 {
+        .error-code {
             font-size: 120px;
             color: #3b82f6;
         }
