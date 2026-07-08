@@ -28,6 +28,18 @@ $page = $_GET['page'] ?? 'accueil';
                     case 'connexion':
                         include 'connexion.php';
                         break;
+                    case 'profil':
+                        include 'profil.php';
+                        break;
+                    case 'ajouter':
+                        include 'ajouter.php';
+                        break;
+                    case 'modifier':
+                        include 'modifier.php';
+                        break;
+                    case 'supprimer':
+                        include 'supprimer.php';
+                        break;
                     default:
                         include 'configuration/404.php';
                         break;

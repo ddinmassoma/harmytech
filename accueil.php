@@ -84,7 +84,7 @@
                 echo "<b>Couleur</b>: ". $row['couleur'] . "<br/>";
                 echo "<b>Marque</b>: ". $row['marque'] . "<br/>";
                 echo "<b>Modèle</b>: ". $row['model'] . "<br/>";
-                echo "<b>Réference constructeur</b>: ". $row['ref constructeur'] . "<br/>";
+                echo "<b>Réference constructeur</b>: ". $row['reference'] . "<br/>";
                 echo "<b>ID</b>: ". $row['id'] . "<br/>";
                 echo ""."<br/>";
             }
@@ -154,7 +154,7 @@ if (isset($_GET['submit'])) {
             echo "<b>Marque</b>: ". htmlspecialchars($row['marque']) . "<br/>";
             echo "<b>Modèle</b>: ". htmlspecialchars($row['model']) . "<br/>";
             echo "<b>Mémoire</b>: ". htmlspecialchars($row['memoire']) . "<br/>";
-            echo "<b>Réference constructeur</b>: ". htmlspecialchars($row['ref constructeur']) . "<br/>";
+            echo "<b>Réference constructeur</b>: ". htmlspecialchars($row['reference']) . "<br/>";
             echo "<b>ID</b>: ". $row['id'] . "<br/>";
             echo "<br/>";
         }
