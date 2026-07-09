@@ -1,18 +1,43 @@
-<h1>Ajouter un produit</h1>
+<div class="form-container">
+    <h1 class="form-title">Ajouter un produit</h1>
 
-<form action="" method="post">
-    <input type="text" name="nom" placeholder="Nom du produit" required>
-    <input type="text" name="marque" placeholder="Marque du produit" required>
-    <input type="text" name="couleur" placeholder="Couleur du produit" required>
-    <input type="text" name="memoire" placeholder="Mémoire du produit" required>
-    <input type="text" name="model" placeholder="Modèle du produit" required>
-    <input type="text" name="reference" placeholder="Référence du produit" required>
-    <button type="submit" name="ajouter">Ajouter</button>
-</form>
+    <form action="" method="post" class="product-form">
+        <div class="form-grid">
+            <div class="input-group">
+                <input type="text" name="nom" placeholder="Nom du produit" required>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" name="marque" placeholder="Marque du produit" required>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" name="couleur" placeholder="Couleur du produit" required>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" name="memoire" placeholder="Mémoire du produit" required>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" name="model" placeholder="Modèle du produit" required>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" name="reference" placeholder="Référence du produit" required>
+            </div>
+        </div>
 
-<a href="index.php?page=accueil">
-    <button>Retour à l'accueil</button>
-</a>
+        <div class="form-actions">
+            <button type="submit" name="ajouter" class="btn-form btn-form-submit">
+                Ajouter le produit
+            </button>
+            <a href="index.php?page=accueil" class="btn-form btn-form-back">
+                Retour à l'accueil
+            </a>
+        </div>
+    </form>
+</div>
 
 <?php
 if (isset($_POST['ajouter'])) {
@@ -35,3 +60,128 @@ if (isset($_POST['ajouter'])) {
     $prepared_stmt->close();
     $connection_string->close();
 } 
+?>
+<style>
+:root {
+    --color-dark-bg: #0b132b;   
+    --color-accent: #5e5ce6;    
+    --color-accent-hover: #4a48c6;
+    --color-text-main: #1f2937;
+    --color-border: #d1d5db;
+    --color-light-bg: #f8fafc;
+}
+
+/* --- Conteneur du Formulaire --- */
+.form-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 35px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #edf2f7;
+}
+
+/* --- Titre du formulaire --- */
+.form-title {
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 24px;
+    color: var(--color-dark-bg);
+    border-bottom: 3px solid var(--color-accent); /* Liseré violet sous le titre */
+    padding-bottom: 10px;
+    font-weight: 700;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+@media (min-width: 600px) {
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr); /* Aligne les champs 2 par 2 */
+    }
+}
+
+/* --- Style des Inputs --- */
+.input-group input[type="text"] {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background-color: var(--color-light-bg);
+    color: var(--color-text-main);
+    outline: none;
+    box-sizing: border-box;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Effet au clic sur un champ */
+.input-group input[type="text"]:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 4px rgba(94, 92, 230, 0.15);
+    background-color: #ffffff;
+}
+
+/* --- Boutons de gestion --- */
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 1px solid #edf2f7;
+    padding-top: 20px;
+}
+
+@media (min-width: 480px) {
+    .form-actions {
+        flex-direction: row-reverse; /* Met le bouton principal à droite */
+        justify-content: flex-start;
+    }
+}
+
+.btn-form {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+}
+
+/* Bouton Ajouter */
+.btn-form-submit {
+    background-color: var(--color-accent);
+    color: #ffffff;
+}
+
+.btn-form-submit:hover {
+    background-color: var(--color-accent-hover);
+    transform: translateY(-1px);
+}
+
+/* Bouton Annuler/Retour */
+.btn-form-back {
+    background-color: transparent;
+    color: var(--color-dark-bg);
+    border: 1px solid var(--color-border);
+}
+
+.btn-form-back:hover {
+    background-color: #f1f5f9;
+    border-color: var(--color-dark-bg);
+}
+
+.btn-form:active {
+    transform: translateY(1px);
+}
+</style>
