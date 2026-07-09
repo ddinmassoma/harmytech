@@ -10,6 +10,10 @@
     <button type="submit" name="ajouter">Ajouter</button>
 </form>
 
+<a href="index.php?page=accueil">
+    <button>Retour à l'accueil</button>
+</a>
+
 <?php
 if (isset($_POST['ajouter'])) {
     $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
@@ -30,4 +34,4 @@ if (isset($_POST['ajouter'])) {
     }
     $prepared_stmt->close();
     $connection_string->close();
-}
+} 

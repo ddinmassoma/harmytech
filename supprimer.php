@@ -1,58 +1,47 @@
 <h1>Supprimer un produit</h1>
 
 <?php
-if (isset($_POST['confirmer_supprimer'])) {
-        $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-        $sql_delete = "DELETE FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
-        $prepared_stmt_delete = $connection_string->prepare($sql_delete);
-        $prepared_stmt_delete->bind_param('i', $id);
-        if ($prepared_stmt_delete->execute() === true) {
-            echo "Produit supprimé avec succès.";
-        } else {
-            echo "Erreur lors de la suppression du produit.";
-        }
-        $prepared_stmt_delete->close();
-}else if (isset($_POST['annuler_supprimer'])) {
-    echo "Suppression annulée.";
-    exit();
+if (isset($_GET['id'])) {
+    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+    $id = $_GET['id'];
+    $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
+    $prepared_stmt = $connection_string->prepare($sql);
+    $prepared_stmt->bind_param('i', $id);
+    $prepared_stmt->execute();
+    $result = $prepared_stmt->get_result();
+    $row = $result->fetch_assoc();
+
+    if (isset($_POST['supprimer'])) {
+    $id = $_GET['id'];
+    $sql = "DELETE FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
+    $prepared_stmt = $connection_string->prepare($sql);
+    $prepared_stmt->bind_param('i', $id);
+    if ($prepared_stmt->execute() === true) {
+        echo "Produit supprimé avec succès.";
+    } else {
+        echo "Erreur lors de la suppression du produit.";
+    }
+    $prepared_stmt->close();
+    $connection_string->close();
+    } else{
+        echo "<b>Nom</b>: ". $row['nom'] . "<br/>";
+        echo "<b>Couleur</b>: ". $row['couleur'] . "<br/>";
+        echo "<b>Marque</b>: ". $row['marque'] . "<br/>";
+        echo "<b>Modèle</b>: ". $row['model'] . "<br/>";
+        echo "<b>Mémoire</b>: ". $row['memoire'] . "<br/>";
+        echo "<b>Réference constructeur</b>: ". $row['reference'] . "<br/>";
+        echo "<b>ID</b>: ". $row['id'] . "<br/>";
+        echo "<p>Êtes-vous sûr de vouloir supprimer ce produit ?</p>"."<br/>";
+    }
+}else {
+    echo "Aucun produit trouvé.";
 }
 ?>
 
 <form action="" method="post">
-    <input type="number" name="id" placeholder="ID du produit à supprimer" required>
-    <button type="submit" name="supprimer">Sélectionner</button>
+    <button type="submit" name="supprimer">Supprimer le produit</button>
 </form>
 
-<?php
-if (isset($_POST['supprimer'])) {
-    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-    $id = $_POST['id'] ?? '';
-    echo "Information du produit supprimé :<br/>";
-    $sql_info = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
-    $prepared_stmt_info = $connection_string->prepare($sql_info);
-    $prepared_stmt_info->bind_param('i', $id);
-    $prepared_stmt_info->execute();
-    $result_info = $prepared_stmt_info->get_result();
-
-    if ($result_info->num_rows === 1) {
-        $row = $result_info->fetch_assoc();
-        echo "<b>Nom</b>: ". htmlspecialchars($row['nom']) . "<br/>";
-        echo "<b>Couleur</b>: ". htmlspecialchars($row['couleur']) . "<br/>";
-        echo "<b>Marque</b>: ". htmlspecialchars($row['marque']) . "<br/>";
-        echo "<b>Modèle</b>: ". htmlspecialchars($row['model']) . "<br/>";
-        echo "<b>Mémoire</b>: ". htmlspecialchars($row['memoire']) . "<br/>";
-        echo "<b>Réference constructeur</b>: ". htmlspecialchars($row['reference']) . "<br/>";
-        echo "<b>ID</b>: ". htmlspecialchars($row['id']) . "<br/>";
-
-        echo "
-        <form action='' method='post'>
-            <button type='submit' name='confirmer_supprimer'>Confirmer la suppression</button>
-            <button type='submit' name='annuler_supprimer'>Annuler</button>
-        </form>
-        ";
-    } else {
-        echo "Aucun produit trouvé avec cet ID.";
-    }
-
-    $connection_string->close();
-}
+<a href="index.php?page=accueil">
+    <button>Retour à l'accueil</button>
+</a>

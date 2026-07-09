@@ -1,3 +1,7 @@
+<a href="index.php?page=ajouter">
+    <button>Ajouter un produit</button>
+</a>
+
 <form action="" method="get">
 		<input
 			type="text"
@@ -85,8 +89,15 @@
                 echo "<b>Couleur</b>: ". $row['couleur'] . "<br/>";
                 echo "<b>Marque</b>: ". $row['marque'] . "<br/>";
                 echo "<b>Modèle</b>: ". $row['model'] . "<br/>";
+                echo "<b>Mémoire</b>: ". $row['memoire'] . "<br/>";
                 echo "<b>Réference constructeur</b>: ". $row['reference'] . "<br/>";
                 echo "<b>ID</b>: ". $row['id'] . "<br/>";
+                echo "<a href=\"index.php?page=supprimer&id=" . $row['id'] . "\">
+                        <button>Supprimer</button>
+                    </a><br/>";
+                echo "<a href=\"index.php?page=modifier&id=" . $row['id'] . "\">
+                        <button>Modifier</button>
+                    </a><br/>";
                 echo ""."<br/>";
             }
         }
@@ -102,6 +113,9 @@
                 echo '<a href="index.php?page=accueil&search=' .urlencode($_GET['search']) .'&submit=Rechercher&subpage=' . $i .'">' . $i .'</a>';
             }
         }
+
+        $prepared_stmt->close();
+        $connection_string->close();
     }
 ?>
 
@@ -151,6 +165,12 @@ if (isset($_GET['submit'])) {
             echo "<b>Mémoire</b>: ". htmlspecialchars($row['memoire']) . "<br/>";
             echo "<b>Réference constructeur</b>: ". htmlspecialchars($row['reference']) . "<br/>";
             echo "<b>ID</b>: ". $row['id'] . "<br/>";
+            echo "<a href=\"index.php?page=supprimer&id=" . $row['id'] . "\">
+                    <button>Supprimer</button>
+                </a><br/>";
+            echo "<a href=\"index.php?page=modifier&id=" . $row['id'] . "\">
+                    <button>Modifier</button>
+                </a><br/>";
             echo "<br/>";
         }
     } else {
@@ -170,4 +190,5 @@ if (isset($_GET['submit'])) {
             }
         }
     }
+    $connection->close();
 }

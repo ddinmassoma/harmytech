@@ -15,7 +15,6 @@ $page = $_GET['page'] ?? 'accueil';
         <header>
             <h1>Catalogue Harmytech</h1>
             <nav>
-                <a href="index.php?page=accueil">Accueil</a>
                 <a href="index.php?page=connexion">Connexion</a>
             </nav>
         </header>
@@ -27,9 +26,6 @@ $page = $_GET['page'] ?? 'accueil';
                         break;
                     case 'connexion':
                         include 'connexion.php';
-                        break;
-                    case 'profil':
-                        include 'profil.php';
                         break;
                     case 'ajouter':
                         include 'ajouter.php';
