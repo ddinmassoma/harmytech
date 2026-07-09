@@ -42,7 +42,8 @@
         <option value="256Go">256 Go</option>
         <option value="512Go">512 Go</option>
         <option value="1To">1 To</option>
-        <option value="autre">Autre</option>
+        <option value="2To">2 To</option>
+        <option value="inconnue">Autre</option>
     </select>
 
     <button type="submit">Voir les produits</button>
@@ -124,15 +125,9 @@ if (isset($_GET['submit'])) {
     if($couleur =="autre"){
         $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 
             WHERE marque LIKE '%$marque%' 
-            AND couleur NOT IN ('noir', 'blanc', 'gris', 'rouge', 'bleu', 'vert', 'jaune', 'violet', 'rose', 'orange') 
-            AND memoire LIKE '%$memoire%'
-            ORDER BY id
-            LIMIT $limit OFFSET $offset";
-    }elseif($memoire =="autre"){
-        $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 
-            WHERE marque LIKE '%$marque%' 
+            AND couleur NOT IN ('noir', 'blanc', 'gris', 'rouge', 'bleu', 'vert', 'jaune', 'violet', 'rose', 'orange')
             AND couleur LIKE '%$couleur%' 
-            AND memoire NOT IN ('32Go', '64Go', '128Go', '256Go', '512Go', '1To') 
+            AND memoire LIKE '%$memoire%'
             ORDER BY id
             LIMIT $limit OFFSET $offset";
     }else{
