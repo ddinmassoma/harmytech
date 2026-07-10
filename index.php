@@ -36,6 +36,9 @@ $page = $_GET['page'] ?? 'accueil';
                     case 'supprimer':
                         include 'supprimer.php';
                         break;
+                    case 'brouillon':
+                        include 'brouillon.php';
+                        break;
                     default:
                         include 'configuration/404.php';
                         break;

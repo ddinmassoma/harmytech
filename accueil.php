@@ -19,7 +19,7 @@
 
         <form method="get" action="" class="filter-form">
             <input type="hidden" name="page" value="accueil">
-            
+             
             <div class="select-wrapper">
                 <select name="marque">
                     <option value="">-- Sélectionner une marque --</option>
