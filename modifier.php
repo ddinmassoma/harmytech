@@ -171,7 +171,7 @@
     border: none;
 }
 
-/* Bouton Ajouter */
+
 .btn-form-submit {
     background-color: var(--color-accent);
     color: #ffffff;

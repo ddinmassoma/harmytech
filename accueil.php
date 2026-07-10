@@ -230,7 +230,10 @@ if (isset($_GET['submit'])) {
     --color-accent-hover: #4a48c6;
     --color-text-main: #1f2937;  
     --color-border: #d1d5db;     
-    --color-light-bg: #f8fafc; 
+    --color-light-bg: #f8fafc;
+    --color-danger: #ef4444;       
+    --color-danger-hover: #dc2626;
+    --color-muted: #6b7280; 
 }
 
 /* --- Conteneur Général --- */
@@ -344,12 +347,6 @@ if (isset($_GET['submit'])) {
 .icon {
     margin-right: 6px;
     font-weight: bold;
-}
-
-:root {
-    --color-danger: #ef4444;       
-    --color-danger-hover: #dc2626;
-    --color-muted: #6b7280;       
 }
 
 /* --- La Carte Produit --- */
