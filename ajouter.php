@@ -36,31 +36,32 @@
                 Retour à l'accueil
             </a>
         </div>
+        <?php
+            if (isset($_POST['ajouter'])) {
+                $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+                $nom = $_POST['nom'] ?? '';
+                $marque = $_POST['marque'] ?? '';
+                $couleur = $_POST['couleur'] ?? '';
+                $memoire = $_POST['memoire'] ?? '';
+                $model = $_POST['model'] ?? '';
+                $reference = $_POST['reference'] ?? '';
+
+                $sql = "INSERT INTO base_de_donn__e___harmytech___feuille_1 (nom, marque, couleur, memoire, model, reference) VALUES (?, ?, ?, ?, ?, ?)";
+                $prepared_stmt = $connection_string->prepare($sql);
+                $prepared_stmt->bind_param('ssssss', $nom, $marque, $couleur, $memoire, $model, $reference);
+                if ($prepared_stmt->execute() === false) {
+                    echo "<p class='alert alert-error'>Erreur lors de l'ajout du produit.</p>";
+                } else {
+                    echo "<p class='alert alert-success'>Produit ajouté avec succès.</p>";
+                }
+                $prepared_stmt->close();
+                $connection_string->close();
+            } 
+        ?>
     </form>
 </div>
 
-<?php
-if (isset($_POST['ajouter'])) {
-    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-    $nom = $_POST['nom'] ?? '';
-    $marque = $_POST['marque'] ?? '';
-    $couleur = $_POST['couleur'] ?? '';
-    $memoire = $_POST['memoire'] ?? '';
-    $model = $_POST['model'] ?? '';
-    $reference = $_POST['reference'] ?? '';
 
-    $sql = "INSERT INTO base_de_donn__e___harmytech___feuille_1 (nom, marque, couleur, memoire, model, reference) VALUES (?, ?, ?, ?, ?, ?)";
-    $prepared_stmt = $connection_string->prepare($sql);
-    $prepared_stmt->bind_param('ssssss', $nom, $marque, $couleur, $memoire, $model, $reference);
-    if ($prepared_stmt->execute() === false) {
-        echo "Erreur lors de l'ajout du produit.";
-    } else {
-        echo "Produit ajouté avec succès.";
-    }
-    $prepared_stmt->close();
-    $connection_string->close();
-} 
-?>
 <style>
 :root {
     --color-dark-bg: #0b132b;   
@@ -183,5 +184,29 @@ if (isset($_POST['ajouter'])) {
 
 .btn-form:active {
     transform: translateY(1px);
+}
+
+/* --- Style des Messages d'Alerte (Succès / Erreur) --- */
+.alert {
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    border-left: 5px solid transparent;
+}
+
+/* Alerte Réussite */
+.alert-success {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border-color: #10b981;
+}
+
+/* Alerte Erreur */
+.alert-error {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border-color: #ef4444;
 }
 </style>
