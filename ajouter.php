@@ -1,66 +1,146 @@
-<div class="form-container">
-    <h1 class="form-title">Ajouter un produit</h1>
-
-    <form action="" method="post" class="product-form">
-        <div class="form-grid">
-            <div class="input-group">
-                <input type="text" name="nom" placeholder="Nom du produit" required>
-            </div>
-            
-            <div class="input-group">
-                <input type="text" name="marque" placeholder="Marque du produit" required>
-            </div>
-            
-            <div class="input-group">
-                <input type="text" name="couleur" placeholder="Couleur du produit" required>
-            </div>
-            
-            <div class="input-group">
-                <input type="text" name="memoire" placeholder="Mémoire du produit" required>
-            </div>
-            
-            <div class="input-group">
-                <input type="text" name="model" placeholder="Modèle du produit" required>
-            </div>
-            
-            <div class="input-group">
-                <input type="text" name="reference" placeholder="Référence du produit" required>
-            </div>
+<h1>Ajouter un produit</h1>
+<div class="search-filter-bar">
+    <form action="" method="get" class="filter-form">
+        <input type="hidden" name="page" value="ajouter">
+        <div class="select-wrapper">
+            <select name="nb_produit">
+                <option value="1">-- Entrer le nombre de produit à ajouter --</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+            </select>
+            <button type="submit" class="btn btn-primary" name="list_ajout">Entrer</button>
         </div>
-
-        <div class="form-actions">
-            <button type="submit" name="ajouter" class="btn-form btn-form-submit">
-                Ajouter le produit
-            </button>
-            <a href="index.php?page=accueil" class="btn-form btn-form-back">
-                Retour à l'accueil
-            </a>
-        </div>
-        <?php
-            if (isset($_POST['ajouter'])) {
-                $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-                $nom = $_POST['nom'] ?? '';
-                $marque = $_POST['marque'] ?? '';
-                $couleur = $_POST['couleur'] ?? '';
-                $memoire = $_POST['memoire'] ?? '';
-                $model = $_POST['model'] ?? '';
-                $reference = $_POST['reference'] ?? '';
-
-                $sql = "INSERT INTO base_de_donn__e___harmytech___feuille_1 (nom, marque, couleur, memoire, model, reference) VALUES (?, ?, ?, ?, ?, ?)";
-                $prepared_stmt = $connection_string->prepare($sql);
-                $prepared_stmt->bind_param('ssssss', $nom, $marque, $couleur, $memoire, $model, $reference);
-                if ($prepared_stmt->execute() === false) {
-                    echo "<p class='alert alert-error'>Erreur lors de l'ajout du produit.</p>";
-                } else {
-                    echo "<p class='alert alert-success'>Produit ajouté avec succès.</p>";
-                }
-                $prepared_stmt->close();
-                $connection_string->close();
-            } 
-        ?>
     </form>
 </div>
 
+<?php 
+function formulaire($n){
+    // Récupération des valeurs existantes dans l'URL pour ne pas vider les champs au rechargement
+    $nom = $_GET["nom$n"] ?? '';
+    $marque = $_GET["marque$n"] ?? '';
+    $couleur = $_GET["couleur$n"] ?? '';
+    $memoire = $_GET["memoire$n"] ?? '';
+    $model = $_GET["model$n"] ?? '';
+    $reference = $_GET["reference$n"] ?? '';
+
+    echo "<div class='form-container'>";
+        echo"<h1 class='form-title'>Produit n°". $n ."</h1>";
+
+        // Transformation en <div> pour permettre un formulaire unique global, tout en gardant ton CSS
+        echo "<div class='product-form'>";
+
+            echo "<div class='form-grid'>";
+                echo "<div class='input-group'>";
+                    echo "<input type='text' name='nom$n' placeholder='Nom du produit' value='".htmlspecialchars($nom, ENT_QUOTES)."' required>";
+                echo "</div>";
+                
+                echo "<div class='input-group'>";
+                    echo "<input type='text' name='marque$n' placeholder='Marque du produit' value='".htmlspecialchars($marque, ENT_QUOTES)."' required>";
+                echo "</div>";
+                
+                echo "<div class='input-group'>";
+                    echo "<input type='text' name='couleur$n' placeholder='Couleur du produit' value='".htmlspecialchars($couleur, ENT_QUOTES)."' required>";
+                echo "</div>";
+                
+                echo "<div class='input-group'>";
+                    echo "<input type='text' name='memoire$n' placeholder='Mémoire du produit' value='".htmlspecialchars($memoire, ENT_QUOTES)."' required>";
+                echo "</div>";
+                
+                echo "<div class='input-group'>";
+                    echo "<input type='text' name='model$n' placeholder='Modèle du produit' value='".htmlspecialchars($model, ENT_QUOTES)."' required>";
+                echo "</div>";
+                
+                echo "<div class='input-group'>";
+                    echo "<input type='text' name='reference$n' placeholder='Référence du produit' value='".htmlspecialchars($reference, ENT_QUOTES)."' required>";
+                echo "</div>";
+            echo "</div>";
+
+            echo "<div class='form-actions'>";
+                echo "<button type='submit' name='ajouter' class='btn-form btn-form-submit'>";
+                    echo "Ajouter les produits";
+                echo "</button>";
+                echo "<a href='index.php?page=accueil' class='btn-form btn-form-back'>";
+                    echo "Retour à l'accueil";
+                echo "</a>";
+            echo "</div>";
+
+        echo "</div>"; // Fin de la div product-form
+    echo "</div>";
+}
+
+function ajouter($connection,$marque,$nom,$couleur,$reference,$model,$memoire){
+    $sql = "INSERT INTO base_de_donn__e___harmytech___feuille_1 (nom, marque, couleur, memoire, model, reference) VALUES (?, ?, ?, ?, ?, ?)";
+    $prepared_stmt = $connection->prepare($sql);
+    $prepared_stmt->bind_param('ssssss', $nom, $marque, $couleur, $memoire, $model, $reference);
+    if ($prepared_stmt->execute() === false) {
+        echo "<p class='alert alert-error'>Erreur lors de l'ajout du produit.</p>";
+    } else {
+        echo "<p class='alert alert-success'>Produit ajouté avec succès.</p>";
+    }
+}
+
+if(isset($_GET['list_ajout'])){
+    $nb_produit = $_GET['nb_produit'] ? (int)$_GET['nb_produit'] : 1;
+    $connection = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+    
+    // Création d'un SEUL formulaire qui englobe tous les produits
+    echo "<form action='' method='get'>";
+    echo "<input type='hidden' name='page' value='ajouter'>";
+    echo "<input type='hidden' name='list_ajout' value=''>";
+    echo "<input type='hidden' name='nb_produit' value='".$nb_produit."'>";
+    
+    for($i=1;$i<=$nb_produit;$i++){
+        formulaire($i);
+    }
+    
+    echo "</form>"; // Fin du formulaire global
+    
+    if (isset($_GET['ajouter'])){ 
+        for($i=1;$i<=$nb_produit;$i++){
+            $nom = $_GET['nom'.$i] ?? '';
+            $marque = $_GET['marque'.$i] ?? '';
+            $couleur = $_GET['couleur'.$i] ?? '';
+            $memoire = $_GET['memoire'.$i] ?? '';
+            $model = $_GET['model'.$i] ?? '';
+            $reference = $_GET['reference'.$i] ?? '';
+            if ($marque!='' && $nom!='' && $couleur!=''&& $reference!=''&& $model!=''&& $memoire!=''){
+                ajouter($connection, $marque, $nom, $couleur, $reference, $model, $memoire);
+            } 
+        }
+        $connection->close();
+    }
+    
+} else {
+    // Mode 1 seul produit par défaut
+    echo "<form action='' method='get'>";
+    echo "<input type='hidden' name='page' value='ajouter'>";
+    formulaire(1);
+    echo "</form>";
+
+    if(isset($_GET['ajouter'])){
+        $connection = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+        
+        $nom = $_GET['nom1'] ?? '';
+        $marque = $_GET['marque1'] ?? '';
+        $couleur = $_GET['couleur1'] ?? '';
+        $memoire = $_GET['memoire1'] ?? '';
+        $model = $_GET['model1'] ?? '';
+        $reference = $_GET['reference1'] ?? '';
+        
+        if ($marque!='' && $nom!='' && $couleur!=''&& $reference!=''&& $model!=''&& $memoire!=''){
+            ajouter($connection, $marque, $nom, $couleur, $reference, $model, $memoire);
+        }
+        $connection->close();
+    }
+}
+?>
 
 <style>
 :root {
@@ -208,5 +288,55 @@
     background-color: #fef2f2;
     color: #991b1b;
     border-color: #ef4444;
+}
+
+/* --- Inputs & Selects stylisés --- */
+.search-filter-bar input[type="text"],
+.search-filter-bar select {
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background-color: var(--color-light-bg);
+    color: var(--color-text-main);
+    outline: none;
+    transition: all 0.2s ease-in-out;
+    min-width: 180px;
+}
+
+.search-filter-bar input[type="text"]:focus,
+.search-filter-bar select:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(94, 92, 230, 0.15);
+    background-color: #ffffff;
+}
+
+/* --- Boutons Stylisés --- */
+.btn {
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary {
+    background-color: var(--color-dark-bg);
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: #1c2541;
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(1px);
 }
 </style>
