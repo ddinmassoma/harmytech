@@ -4,7 +4,7 @@
         <input type="hidden" name="page" value="brouillon">
         <div class="select-wrapper">
             <select name="nb_produit">
-                <option value="0">-- Entrer le nombre de produit à ajouter --</option>
+                <option value="1">-- Entrer le nombre de produit à ajouter --</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
                 <option value="4">4</option>
@@ -21,40 +21,42 @@
 </div>
 
 <?php 
-if(isset($_GET['list_ajout'])){
-    $nb_produit=$_GET['nb_produit']? (int)$_GET['nb_produit']:0;
-    $connection = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-    for($i=1;$i<=$nb_produit;$i++){
+function formulaire($n){
     echo "<div class='form-container'>";
-        echo"<h1 class='form-title'>Produit n°". $i ."</h1>";
+        echo"<h1 class='form-title'>Produit n°". $n ."</h1>";
 
         echo "<form action='' method='get' class='product-form'>";
 
             echo "<input type='hidden' name='page' value='brouillon'>";
 
+            if(isset($_GET['list_ajout']) && isset($_GET['nb_produit'])){
+                echo "<input type='hidden' name='list_ajout' value=''>";
+                echo "<input type='hidden' name='nb_produit' value='".(int)$_GET['nb_produit']."'>";
+            }
+
             echo "<div class='form-grid'>";
                 echo "<div class='input-group'>";
-                    echo "<input type='text' name='nom$i' placeholder='Nom du produit' required>";
+                    echo "<input type='text' name='nom$n' placeholder='Nom du produit' required>";
                 echo "</div>";
                 
                 echo "<div class='input-group'>";
-                    echo "<input type='text' name='marque$i' placeholder='Marque du produit' required>";
+                    echo "<input type='text' name='marque$n' placeholder='Marque du produit' required>";
                 echo "</div>";
                 
                 echo "<div class='input-group'>";
-                    echo "<input type='text' name='couleur$i' placeholder='Couleur du produit' required>";
+                    echo "<input type='text' name='couleur$n' placeholder='Couleur du produit' required>";
                 echo "</div>";
                 
                 echo "<div class='input-group'>";
-                    echo "<input type='text' name='memoire$i' placeholder='Mémoire du produit' required>";
+                    echo "<input type='text' name='memoire$n' placeholder='Mémoire du produit' required>";
                 echo "</div>";
                 
                 echo "<div class='input-group'>";
-                    echo "<input type='text' name='model$i' placeholder='Modèle du produit' required>";
+                    echo "<input type='text' name='model$n' placeholder='Modèle du produit' required>";
                 echo "</div>";
                 
                 echo "<div class='input-group'>";
-                    echo "<input type='text' name='reference$i' placeholder='Référence du produit' required>";
+                    echo "<input type='text' name='reference$n' placeholder='Référence du produit' required>";
                 echo "</div>";
             echo "</div>";
 
@@ -69,96 +71,57 @@ if(isset($_GET['list_ajout'])){
 
         echo "</form>";
     echo "</div>";
+}
+
+function ajouter($connection,$marque,$nom,$couleur,$reference,$model,$memoire){
+    $sql = "INSERT INTO base_de_donn__e___harmytech___feuille_1 (nom, marque, couleur, memoire, model, reference) VALUES (?, ?, ?, ?, ?, ?)";
+    $prepared_stmt = $connection->prepare($sql);
+    $prepared_stmt->bind_param('ssssss', $nom, $marque, $couleur, $memoire, $model, $reference);
+    if ($prepared_stmt->execute() === false) {
+        echo "<p class='alert alert-error'>Erreur lors de l'ajout du produit.</p>";
+    } else {
+        echo "<p class='alert alert-success'>Produit ajouté avec succès.</p>";
     }
-    if($nb_produit==0){
-        $newURL="index.php?page=brouillon";
-        header("Location: " . $newURL, true, 303);      
-    }else{
-    if (isset($_GET['ajouter'])){
-        if($nb_produit>1){
-            $connection = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-            $erreur = true;
-            for($i=1;$i<=$nb_produit;$i++){
-                $nom = $_GET['nom'.$i] ?? '';
-                $marque = $_GET['marque'.$i] ?? '';
-                $couleur = $_GET['couleur'.$i] ?? '';
-                $memoire = $_GET['memoire'.$i] ?? '';
-                $model = $_GET['model'.$i] ?? '';
-                $reference = $_GET['reference'.$i] ?? '';
-                $sql = "INSERT INTO base_de_donn__e___harmytech___feuille_1 (nom, marque, couleur, memoire, model, reference) VALUES (?, ?, ?, ?, ?, ?)";
-                $prepared_stmt = $connection->prepare($sql);
-                $prepared_stmt->bind_param('ssssss', $nom, $marque, $couleur, $memoire, $model, $reference);
-                if ($prepared_stmt->execute() === true) {
-                    $erreur = false;
-                }
-            }
-            if ($erreur==false) {
-                    echo "<p class='alert alert-error'>Erreur lors de l'ajout du produit.</p>";
-            } else {
-                echo "<p class='alert alert-success'>Produit ajouté avec succès.</p>";
-            }
-            $connection->close();
+}
+
+
+if(isset($_GET['list_ajout'])){
+    $nb_produit=$_GET['nb_produit']? (int)$_GET['nb_produit']:1;
+    $connection = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+    for($i=1;$i<=$nb_produit;$i++){
+        formulaire($i);
+    }
+    
+    if (isset($_GET['ajouter'])){ 
+        for($i=1;$i<=$nb_produit;$i++){
+            $nom = $_GET['nom'.$i] ?? '';
+            $marque = $_GET['marque'.$i] ?? '';
+            $couleur = $_GET['couleur'.$i] ?? '';
+            $memoire = $_GET['memoire'.$i] ?? '';
+            $model = $_GET['model'.$i] ?? '';
+            $reference = $_GET['reference'.$i] ?? '';
+            if ($marque!='' && $nom!='' && $couleur!=''&& $reference!=''&& $model!=''&& $memoire!=''){
+                ajouter($connection, $marque, $nom, $couleur, $reference, $model, $memoire);
+            } 
         }
-    }
-    }
-}else{
-    echo "<div class='form-container'>";
-        echo"<h1 class='form-title'>Produit n°1</h1>";
-
-        echo "<form action='' method='post' class='product-form'>";
-            echo "<div class='form-grid'>";
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='nom' placeholder='Nom du produit' required>";
-                echo "</div>";
-                
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='marque' placeholder='Marque du produit' required>";
-                echo "</div>";
-                
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='couleur' placeholder='Couleur du produit' required>";
-                echo "</div>";
-                
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='memoire' placeholder='Mémoire du produit' required>";
-                echo "</div>";
-                
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='model' placeholder='Modèle du produit' required>";
-                echo "</div>";
-                
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='reference' placeholder='Référence du produit' required>";
-                echo "</div>";
-            echo "</div>";
-            echo "<div class='form-actions'>";
-                echo "<button type='submit' name='ajouter' class='btn-form btn-form-submit'>Ajouter le produit</button>";
-                echo "<a href='index.php?page=accueil' class='btn-form btn-form-back'>Retour à l'accueil</a>";
-            echo "</div>";
-        echo "</form>";
-    echo "</div>";
-
-
-    if(isset($_POST['ajouter'])){
-        $connection = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-        $nom = $_POST['nom'] ?? '';
-        $marque = $_POST['marque'] ?? '';
-        $couleur = $_POST['couleur'] ?? '';
-        $memoire = $_POST['memoire'] ?? '';
-        $model = $_POST['model'] ?? '';
-        $reference = $_POST['reference'] ?? '';
-        $sql = "INSERT INTO base_de_donn__e___harmytech___feuille_1 (nom, marque, couleur, memoire, model, reference) VALUES (?, ?, ?, ?, ?, ?)";
-        $prepared_stmt = $connection->prepare($sql);
-        $prepared_stmt->bind_param('ssssss', $nom, $marque, $couleur, $memoire, $model, $reference);
-        if ($prepared_stmt->execute() === false) {
-            echo "<p class='alert alert-error'>Erreur lors de l'ajout du produit.</p>";
-        } else {
-            echo "<p class='alert alert-success'>Produit ajouté avec succès.</p>";
-        }
-        $prepared_stmt->close();
         $connection->close();
     }
     
+}else{
+    formulaire(1);
+    if(isset($_GET['ajouter'])){
+        $connection = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+        $nom = $_GET['nom1'] ?? '';
+        $marque = $_GET['marque1'] ?? '';
+        $couleur = $_GET['couleur1'] ?? '';
+        $memoire = $_GET['memoire1'] ?? '';
+        $model = $_GET['model1'] ?? '';
+        $reference = $_GET['reference1'] ?? '';
+        if ($marque!='' && $nom!='' && $couleur!=''&& $reference!=''&& $model!=''&& $memoire!=''){
+            ajouter($connection, $marque, $nom, $couleur, $reference, $model, $memoire);
+        } 
+        $connection->close();
+    }
 }
 
 ?>
