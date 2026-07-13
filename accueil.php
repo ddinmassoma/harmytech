@@ -1,3 +1,10 @@
+<?php
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php?page=connexion");
+    exit;
+}
+?>
+
 <div class="catalog-container">
     
     <div class="action-header">

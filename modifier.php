@@ -1,3 +1,10 @@
+<?php
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php?page=connexion");
+    exit;
+}
+?>
+
 <div class="form-container">
     <h1 class="form-title">Modifier un produit</h1>
 
@@ -11,6 +18,10 @@
         $prepared_stmt->execute();
         $result = $prepared_stmt->get_result();
         $row = $result->fetch_assoc();
+        if ($result->num_rows != 1) {
+            header("Location: index.php?page=accueil");
+            exit();   
+        }
     }
     ?>
     

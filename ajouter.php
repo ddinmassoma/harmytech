@@ -1,3 +1,10 @@
+<?php
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php?page=connexion");
+    exit;
+}
+?>
+
 <h1>Ajouter un produit</h1>
 <div class="search-filter-bar">
     <form action="" method="get" class="filter-form">
@@ -33,7 +40,6 @@ function formulaire($n){
     echo "<div class='form-container'>";
         echo"<h1 class='form-title'>Produit n°". $n ."</h1>";
 
-        // Transformation en <div> pour permettre un formulaire unique global, tout en gardant ton CSS
         echo "<div class='product-form'>";
 
             echo "<div class='form-grid'>";

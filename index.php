@@ -1,6 +1,13 @@
 <?php
+session_start();
 require_once 'configuration/database.php';
-$page = $_GET['page'] ?? 'accueil'; 
+$_SESSION['redirection'] = false;
+if (isset($_SESSION['user_id'])) {
+    $page = $_GET['page'] ?? 'accueil'; 
+    $_SESSION['redirection'] = true;
+}else {
+    $page = $_GET['page'] ?? 'connexion'; 
+}
 ?>
 
 <!DOCTYPE html>
@@ -15,7 +22,11 @@ $page = $_GET['page'] ?? 'accueil';
         <header>
             <h1>Catalogue Harmytech</h1>
             <nav>
-                <a href="index.php?page=connexion">Connexion</a>
+                <?php
+                    if (isset($_SESSION['user_id'])) {
+                        echo "<a href='deconnexion.php' class='deconnexion'>Se déconnecter</a>";
+                    }
+                ?>
             </nav>
         </header>
         <main>
@@ -42,6 +53,12 @@ $page = $_GET['page'] ?? 'accueil';
                 }
             ?>
         </main>
+        <style>
+            .deconnexion{
+                color : red;
+                text-decoration-style: solid;
+            }
+        </style>
         <footer>
             <p>Harmytech</p>
             <p>contact.fr@harmytech.com</p>

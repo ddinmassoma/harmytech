@@ -1,3 +1,9 @@
+<?php
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php?page=connexion");
+    exit;
+}
+?>
 <h1>Supprimer un produit</h1>
 
 <?php
@@ -10,6 +16,10 @@ if (isset($_GET['id'])) {
     $prepared_stmt->execute();
     $result = $prepared_stmt->get_result();
     $row = $result->fetch_assoc();
+    if ($result->num_rows != 1) {
+            header("Location: index.php?page=accueil");
+            exit();   
+    }
 
     if (isset($_POST['supprimer'])) {
     $id = $_GET['id'];
