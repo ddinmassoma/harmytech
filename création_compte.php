@@ -1,50 +1,71 @@
 <?php
-if($_SESSION['redirection'] == true){
+if($_SESSION['redirection']==true){
     header("Location: index.php?page=accueil");
-    exit(); // Toujours mettre un exit() après une redirection header
 }
 
-if (isset($_POST['connexion'])) {
-    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-    $identifiant = $_POST['identifiant'] ?? '';
-    $mot_de_passe = $_POST['mot_de_passe'] ?? '';
-
-    $sql = "SELECT id, statut, mot_de_passe FROM administrateur WHERE identifiant = ?";       
-    $prepared_stmt = $connection_string->prepare($sql);
-    $prepared_stmt->bind_param('s', $identifiant);
+function verification($colonne_sql,$connection,$valeur_unique){
+    $sql = "SELECT $colonne_sql 
+            FROM administrateur 
+            WHERE $colonne_sql = ? "; 
+    $prepared_stmt = $connection->prepare($sql);
+    $prepared_stmt->bind_param('s', $valeur_unique);
     $prepared_stmt->execute();
     $result = $prepared_stmt->get_result();
 
     if ($result->num_rows === 1) {
-        $user = $result->fetch_assoc();
-        if ($mot_de_passe === $user['mot_de_passe']) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['user_statut'] = $user['statut'];
-            $prepared_stmt->close();
-            $connection_string->close();
-            header("Location: index.php?page=accueil");
-            exit();
-        } else {
-            echo "<p class='alert alert-error'>Identifiant ou mot de passe incorrect.</p>";
-        }
-        
-    } else {
-        echo "<p class='alert alert-error'>Identifiant ou mot de passe incorrect.</p>";
+        return 'erreur';
     }
-    $prepared_stmt->close();
-    $connection_string->close();
+
 }
+
+
+if (isset($_POST['création'])){
+    $connection = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+    $identifiant = $_POST['identifiant'] ?? '';
+    $mot_de_passe = $_POST['mot_de_passe'] ?? '';
+    $prenom = $_POST['prenom'] ?? '';
+    $nom = $_POST['nom'] ?? '';
+    $mail = $_POST['e-mail'] ?? '';
+
+    $sql = "INSERT INTO administrateur(identifiant, mot_de_passe, prenom, nom, mail) VALUES (?, ?, ?, ?, ?)";
+    if (verification('mail',$connection,$mail)&&verification('identifiant',$connection,$identifiant)=='erreur'){
+        echo "<p class='alert alert-error'>Erreur lors de l'ajout du nouvelle utilisateur : vous avez entrer un identifiant ou e-mail déjà existant.</p>";
+    }else{
+        $prepared_stmt = $connection->prepare($sql);
+        $prepared_stmt->bind_param('sssss', $identifiant,$mot_de_passe,$prenom,$nom,$mail);
+        if($prepared_stmt->execute() === true){
+            echo "<p class='alert alert-success'>Utilisateur ajouté avec succès.</p>";
+        }else{
+            echo "<p class='alert alert-error'>Erreur lors de l'ajout du nouvelle utilisateur.</p>";
+        }
+        $prepared_stmt->close();
+    }
+    $connection->close();
+}
+
 ?>
 
+
 <form action="" method="post" class="profil">
+    <input type="hidden" name="page" value="création_compte">
+
+    <label>Nom :</label>
+    <input type="text" name="nom" autocomplete="nom" placeholder="Entrez votre nom" required>
+
+    <label>Prénom :</label>
+    <input type="text" name="prenom" autocomplete="prenom" placeholder="Entrez votre prénom" required>
+
+    <label>E-mail :</label>
+    <input type="text" name="e-mail" autocomplete="e-mail" placeholder="Entrez votre email" required>
+
     <label>Identifiant :</label>
     <input type="text" name="identifiant" autocomplete="identifiant" placeholder="Entrez votre identifiant" required>
 
     <label>Mot de passe :</label>
     <input type="password" name="mot_de_passe" autocomplete="mot_de_passe" placeholder="Entrez votre mot de passe" required>
 
-    <button type="submit" name="connexion">Se connecter</button>
-    <p>Vous n'avez pas encore de compte : <a href="index.php?page=création_compte">Créer un compte</a> </p>
+    <button type="submit" name="création">Créer un compte</button>
+    <p>Vous avez déjà un compte : <a href="index.php?page=connexion">Connexion</a> </p>
 </form>
 
 <style>
@@ -140,5 +161,12 @@ if (isset($_POST['connexion'])) {
     background-color: #fef2f2;
     color: #991b1b;
     border-color: #ef4444;
+}
+
+/* Alerte Réussite */
+.alert-success {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border-color: #10b981;
 }
 </style>

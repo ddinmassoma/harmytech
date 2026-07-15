@@ -2,6 +2,10 @@
 if (!isset($_SESSION['user_id'])) {
     header("Location: index.php?page=connexion");
     exit;
+} elseif ($_SESSION['user_statut'] == 'utilisateur') {
+    $_SESSION['message_erreur'] = "Le statut d'administrateur est requis pour effectuer cette action.";
+    header("Location: index.php?page=accueil"); 
+    exit;
 }
 ?>
 

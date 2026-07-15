@@ -47,6 +47,9 @@ if (isset($_SESSION['user_id'])) {
                     case 'supprimer':
                         include 'supprimer.php';
                         break;
+                    case 'création_compte':
+                        include 'création_compte.php';
+                        break;
                     default:
                         include 'configuration/404.php';
                         break;
