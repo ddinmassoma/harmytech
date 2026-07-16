@@ -9,13 +9,13 @@ if (!isset($_SESSION['user_id'])) {
 }
 ?>
 
-<h1>Ajouter un produit</h1>
+<h1>Ajouter un utilisateur</h1>
 <div class="search-filter-bar">
     <form action="" method="get" class="filter-form">
-        <input type="hidden" name="page" value="ajouter">
+        <input type="hidden" name="page" value="ajout_utilisateur">
         <div class="select-wrapper">
-            <select name="nb_produit">
-                <option value="1">-- Entrer le nombre de produit à ajouter --</option>
+            <select name="nb_user">
+                <option value="1">-- Entrer le nombre d'utilisateur' à ajouter --</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
                 <option value="4">4</option>
@@ -26,116 +26,109 @@ if (!isset($_SESSION['user_id'])) {
                 <option value="9">9</option>
                 <option value="10">10</option>
             </select>
-            <button type="submit" class="btn btn-primary" name="list_ajout">Entrer</button>
+            <button type="submit" class="btn btn-primary" name="list_user">Entrer</button>
         </div>
     </form>
 </div>
 
 <?php 
 function formulaire($n){
-    $nom = $_GET["nom$n"] ?? '';
-    $marque = $_GET["marque$n"] ?? '';
-    $couleur = $_GET["couleur$n"] ?? '';
-    $memoire = $_GET["memoire$n"] ?? '';
-    $model = $_GET["model$n"] ?? '';
-    $reference = $_GET["reference$n"] ?? '';
+    $nom = $_POST["nom$n"] ?? '';
+    $prenom = $_POST["prenom$n"] ?? '';
+    $identifiant = $_POST["identifiant$n"] ?? '';
+    $mail = $_POST["mail$n"] ?? '';
+    $mot_de_passe = $_POST["mot_de_passe$n"] ?? '';
 
     echo "<div class='form-container'>";
-        echo "<h1 class='form-title'>Produit n°". $n ."</h1>";
+        echo "<h1 class='form-title'>Utilisateur n°". $n ."</h1>";
         echo "<div class='product-form'>";
             echo "<div class='form-grid'>";
                 echo "<div class='input-group'>";
-                    echo "<input type='text' name='nom$n' placeholder='Nom du produit' value='".htmlspecialchars($nom, ENT_QUOTES)."' required>";
+                    echo "<input type='text' name='nom$n' placeholder='Nom' value='".htmlspecialchars($nom, ENT_QUOTES)."' required>";
                 echo "</div>";
                 
                 echo "<div class='input-group'>";
-                    echo "<input type='text' name='marque$n' placeholder='Marque du produit' value='".htmlspecialchars($marque, ENT_QUOTES)."' required>";
+                    echo "<input type='text' name='prenom$n' placeholder='Prenom' value='".htmlspecialchars($prenom, ENT_QUOTES)."' required>";
                 echo "</div>";
                 
                 echo "<div class='input-group'>";
-                    echo "<input type='text' name='couleur$n' placeholder='Couleur du produit' value='".htmlspecialchars($couleur, ENT_QUOTES)."' required>";
+                    echo "<input type='text' name='identifiant$n' placeholder='identifiant' value='".htmlspecialchars($identifiant, ENT_QUOTES)."' required>";
                 echo "</div>";
                 
                 echo "<div class='input-group'>";
-                    echo "<input type='text' name='memoire$n' placeholder='Mémoire du produit' value='".htmlspecialchars($memoire, ENT_QUOTES)."' required>";
+                    echo "<input type='text' name='mail$n' placeholder='E-mail' value='".htmlspecialchars($mail, ENT_QUOTES)."' required>";
                 echo "</div>";
                 
                 echo "<div class='input-group'>";
-                    echo "<input type='text' name='model$n' placeholder='Modèle du produit' value='".htmlspecialchars($model, ENT_QUOTES)."' required>";
-                echo "</div>";
-                
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='reference$n' placeholder='Référence du produit' value='".htmlspecialchars($reference, ENT_QUOTES)."' required>";
+                    echo "<input type='text' name='mot_de_passe$n' placeholder='Mot de passe' value='".htmlspecialchars($mot_de_passe, ENT_QUOTES)."' required>";
                 echo "</div>";
             echo "</div>";
         echo "</div>";
     echo "</div>";
 }
 
-function ajouter($connection,$marque,$nom,$couleur,$reference,$model,$memoire){
-    $sql = "INSERT INTO base_de_donn__e___harmytech___feuille_1 (nom, marque, couleur, memoire, model, reference) VALUES (?, ?, ?, ?, ?, ?)";
+function ajouter($nom, $prenom, $mail, $identifiant,$mot_de_passe,$connection){
+    $sql = "INSERT INTO administrateur (nom, prenom, mail, identifiant, mot_de_passe) VALUES (?, ?, ?, ?, ?)";
     $prepared_stmt = $connection->prepare($sql);
-    $prepared_stmt->bind_param('ssssss', $nom, $marque, $couleur, $memoire, $model, $reference);
+    $prepared_stmt->bind_param('sssss', $nom, $prenom, $mail, $identifiant,$mot_de_passe);
     if ($prepared_stmt->execute() === false) {
-        echo "<p class='alert alert-error'>Erreur lors de l'ajout du produit \"".htmlspecialchars($nom)."\".</p>";
+        echo "<p class='alert alert-error'>Erreur lors de l'ajout de l'utilisateur</p>";
     } else {
-        echo "<p class='alert alert-success'>Produit \"".htmlspecialchars($nom)."\" ajouté avec succès.</p>";
+        echo "<p class='alert alert-success'>Utilisateur ajouté avec succès.</p>";
     }
 }
 
-if(isset($_GET['list_ajout'])){
-    $nb_produit = isset($_GET['nb_produit']) ? (int)$_GET['nb_produit'] : 1;
+if(isset($_GET['list_user'])){
+    $nb_user = isset($_GET['nb_user']) ? (int)$_GET['nb_user'] : 1;
     $connection = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
     
-    echo "<form action='' method='get'>";
-    echo "<input type='hidden' name='page' value='ajouter'>";
+    echo "<form action='' method='post'>";
+    echo "<input type='hidden' name='page' value='ajout_utilisateur'>";
     echo "<input type='hidden' name='list_ajout' value=''>";
-    echo "<input type='hidden' name='nb_produit' value='".$nb_produit."'>";
-    for($i=1; $i<=$nb_produit; $i++){
+    echo "<input type='hidden' name='nb_produit' value='".$nb_user."'>";
+    for($i=1; $i<=$nb_user; $i++){
         formulaire($i);
     }
     echo "<div class='form-actions'>";
-        echo "<button type='submit' name='ajouter' class='btn-form btn-form-submit'>Ajouter les produits</button>";
-        echo "<a href='index.php?page=accueil' class='btn-form btn-form-back'>Retour à l'accueil</a>";
+        echo "<button type='submit' name='ajouter' class='btn-form btn-form-submit'>Ajouter</button>";
+        echo "<a href='index.php?page=profil_administrateur' class='btn-form btn-form-back'>Retour</a>";
     echo "</div>";
     echo "</form>";
     
-    if (isset($_GET['ajouter'])){ 
-        for($i=1; $i<=$nb_produit; $i++){
-            $nom = $_GET['nom'.$i] ?? '';
-            $marque = $_GET['marque'.$i] ?? '';
-            $couleur = $_GET['couleur'.$i] ?? '';
-            $memoire = $_GET['memoire'.$i] ?? '';
-            $model = $_GET['model'.$i] ?? '';
-            $reference = $_GET['reference'.$i] ?? ''; 
-            if ($marque!='' && $nom!='' && $couleur!='' && $reference!='' && $model!='' && $memoire!=''){
-                ajouter($connection, $marque, $nom, $couleur, $reference, $model, $memoire);
+    if (isset($_POST['ajouter'])){ 
+        for($i=1; $i<=$nb_user; $i++){
+            $nom = $_POST["nom$i"] ?? '';
+            $prenom = $_POST["prenom$i"] ?? '';
+            $identifiant = $_POST["identifiant$i"] ?? '';
+            $mail = $_POST["mail$i"] ?? '';
+            $mot_de_passe = $_POST["mot_de_passe$i"] ?? ''; 
+            if ($prenom!='' && $nom!='' && $mail!='' && $identifiant!='' && $mot_de_passe!='' && $connection!=''){
+                ajouter($nom, $prenom, $mail, $identifiant, $mot_de_passe, $connection);
             } 
         }
         $connection->close();
     }
     
 } else {
-    echo "<form action='' method='get'>";
-    echo "<input type='hidden' name='page' value='ajouter'>";   
+    $connection = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+    echo "<form action='' method='post'>";
+    echo "<input type='hidden' name='page' value='ajout_utilisateur'>";   
     formulaire(1);
     echo "<div class='form-actions'>";
-        echo "<button type='submit' name='ajouter' class='btn-form btn-form-submit'>Ajouter le produit</button>";
-        echo "<a href='index.php?page=accueil' class='btn-form btn-form-back'>Retour à l'accueil</a>";
+        echo "<button type='submit' name='ajouter' class='btn-form btn-form-submit'>Ajouter</button>";
+        echo "<a href='index.php?page=profil_administrateur' class='btn-form btn-form-back'>Retour</a>";
     echo "</div>";
     echo "</form>";
 
-    if(isset($_GET['ajouter'])){
-        $connection = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-        $nom = $_GET['nom1'] ?? '';
-        $marque = $_GET['marque1'] ?? '';
-        $couleur = $_GET['couleur1'] ?? '';
-        $memoire = $_GET['memoire1'] ?? '';
-        $model = $_GET['model1'] ?? '';
-        $reference = $_GET['reference1'] ?? '';
-        if ($marque!='' && $nom!='' && $couleur!='' && $reference!='' && $model!='' && $memoire!=''){
-            ajouter($connection, $marque, $nom, $couleur, $reference, $model, $memoire);
-        }
+    if (isset($_POST['ajouter'])){ 
+            $nom = $_POST["nom1"] ?? '';
+            $prenom = $_POST["prenom1"] ?? '';
+            $identifiant = $_POST["identifiant1"] ?? '';
+            $mail = $_POST["mail1"] ?? '';
+            $mot_de_passe = $_POST["mot_de_passe1"] ?? ''; 
+            if ($prenom!='' && $nom!='' && $mail!='' && $identifiant!='' && $mot_de_passe!='' && $connection!=''){
+                ajouter($nom, $prenom, $mail, $identifiant, $mot_de_passe, $connection);
+            } 
         $connection->close();
     }
 }

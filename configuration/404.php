@@ -5,7 +5,7 @@
         <h2>Oups… page introuvable</h2>
         <p>
             La page que vous recherchez n'existe pas ou a été déplacée.<br>
-            Continuez votre navigation sur Harmytech pour trouver vos produits informatiques.
+            Continuez sur votre navigation sur Harmytech pour trouver vos produits informatiques.
         </p>
 
         <a href="index.php?page=accueil" class="btn">Retour à l'accueil</a>

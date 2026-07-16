@@ -1,0 +1,253 @@
+<?php
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php?page=connexion");
+    exit;
+}elseif ($_SESSION['user_statut'] == 'utilisateur') {
+    $_SESSION['message_erreur'] = "Le statut d'administrateur est requis pour effectuer cette action.";
+    header("Location: index.php?page=accueil"); 
+    exit;
+}
+?>
+
+<h1>Supprimer un profil</h1>
+
+<?php
+if (isset($_GET['id'])) {
+    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+    $id = $_GET['id'];
+    if($id == $_SESSION['user_id']){
+        $_SESSION['message_erreur'] = "Vous ne pouvez pas votre propre profil.";
+        header("Location: index.php?page=profil_administrateur"); 
+        exit();
+    }
+    $sql = "SELECT * FROM administrateur WHERE id = ?";
+    $prepared_stmt = $connection_string->prepare($sql);
+    $prepared_stmt->bind_param('i', $id);
+    $prepared_stmt->execute();
+    $result = $prepared_stmt->get_result();
+    $row = $result->fetch_assoc();
+    if ($result->num_rows != 1) {
+            header("Location: index.php?page=profil_administrateur");
+            exit();   
+    }
+
+    if (isset($_POST['supprimer'])) {
+    $id = $_GET['id'];
+    $sql = "DELETE FROM administrateur WHERE id = ?";
+    $prepared_stmt = $connection_string->prepare($sql);
+    $prepared_stmt->bind_param('i', $id);
+    if ($prepared_stmt->execute() === true) {
+        echo "<p class='alert alert-success'>Utilisateur supprimer avec succés</p>";
+        echo "<a href='index.php?page=profil_administrateur' class='btn-card btn-card-back'>";
+            echo "Retour";
+        echo "</a>";
+    } else {
+        echo "<p class='alert alert-error'>Erreur lors de la suppression de l'utilisateur.</p>";
+        echo "<a href='index.php?page=profil_administrateur' class='btn-card btn-card-back'>";
+            echo "Retour";
+        echo "</a>";
+    }
+    $prepared_stmt->close();
+    $connection_string->close();
+    } else{
+            echo "<div class='product-card'>";
+                echo "<div class='product-body'>";
+                    echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) .' '. htmlspecialchars($row['prenom']) . "</h3>";
+                    
+                    echo "<div class='product-info-grid'>";
+                        echo "<div class='info-item'><span>Identifiant :</span> <strong>" . htmlspecialchars($row['identifiant']) . "</strong></div>";
+                        echo "<div class='info-item'><span>E-mail :</span> <strong>" . htmlspecialchars($row['mail']) . "</strong></div>";
+                        echo "<div class='info-item'><span>Statut :</span> <strong>" . htmlspecialchars($row['statut']) . "</strong></div>";
+                        echo "<div class='info-item'><span>Date de création du profil  :</span> <strong>" . htmlspecialchars($row['date']) . "</strong></div>";
+                    echo "</div>";
+                    echo "<span class='product-id-badge'>ID: " . $row['id'] . "</span>";
+                echo "</div>";
+
+                echo "<p class='alert alert-advetissement'>Êtes-vous sûr de vouloir supprimer ce profil ?</p>"."<br/>";
+                
+                echo "<div class='product-footer'>";
+                    echo "<a href='index.php?page=profil_administrateur' class='btn-card btn-card-back'>";
+                        echo "Retour";
+                    echo "</a>";
+                    echo"<form action='' method='post'>";
+                        echo"<button type='submit' name='supprimer' class='btn-form btn-form-submit'>Supprimer l'utilisateur</button>";
+                    echo "</form>";
+                echo "</div>";
+            echo "</div>";
+    }
+}else {
+    echo "Aucun produit trouvé.";
+}
+?>
+
+<style>
+:root {
+    --color-dark-bg: #0b132b;    
+    --color-accent: #5e5ce6;     
+    --color-accent-hover: #4a48c6;
+    --color-text-main: #1f2937;  
+    --color-border: #d1d5db;     
+    --color-light-bg: #f8fafc; 
+    --color-danger: #ef4444;       
+    --color-danger-hover: #dc2626;
+    --color-muted: #6b7280; 
+}
+
+/* --- La Carte Produit --- */
+.product-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    max-width: 450px;
+    margin: 20px 0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* --- Corps de la carte --- */
+.product-body {
+    padding: 20px;
+    position: relative;
+}
+
+.product-title {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: var(--color-dark-bg); 
+    border-bottom: 2px solid var(--color-accent);
+    padding-bottom: 8px;
+}
+
+/* Grille d'informations internes */
+.product-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.info-item {
+    font-size: 14px;
+    color: var(--color-text-main);
+    display: flex;
+    justify-content: space-between; 
+}
+
+.info-item span {
+    color: var(--color-muted);
+}
+
+.product-ref {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+/* Badge ID discret en haut à droite */
+.product-id-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #f1f5f9;
+    color: var(--color-muted);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+.product-footer {
+    background: #f8fafc;
+    padding: 12px 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end; /* Aligne les boutons à droite */
+    border-top: 1px solid #edf2f7;
+}
+
+/* Style de base des boutons de carte */
+.btn-card {
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+/* Bouton Accueil */
+.btn-card-back {
+    background-color: var(--color-dark-bg);
+    color: #ffffff;
+}
+
+.btn-card-back:hover {
+    background-color: #1c2541;
+    transform: translateY(-1px);
+}
+
+/* Bouton Supprimer */
+.btn-form {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+}
+
+.btn-form:active {
+    transform: translateY(1px);
+}
+
+.btn-form-submit {
+    background-color: var(--color-danger-hover);
+    color: #ffffff;
+}
+
+.btn-form-submit:hover {
+    transform: translateY(-1px);
+}
+
+/* --- Style des Messages d'Alerte (Succès / Erreur / Avertissement) --- */
+.alert {
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    border-left: 5px solid transparent;
+}
+
+/* Alerte Réussite */
+.alert-success {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border-color: #10b981;
+}
+
+/* Alerte Erreur */
+.alert-error {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border-color: #ef4444;
+}
+
+/* Alerte Avertissement */
+.alert-advetissement{
+    background-color: #fef2f2;
+    color: #fa8e00;
+    border-color: #e7782e;
+}
+</style>

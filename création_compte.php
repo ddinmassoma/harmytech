@@ -32,7 +32,7 @@ if (isset($_POST['création'])){
         echo "<p class='alert alert-error'>Erreur lors de l'ajout du nouvelle utilisateur : vous avez entrer un identifiant ou e-mail déjà existant.</p>";
     }else{
         $prepared_stmt = $connection->prepare($sql);
-        $prepared_stmt->bind_param('sssss', $identifiant,$mot_de_passe,$prenom,$nom,$mail);
+        $prepared_stmt->bind_param('sssss', $identifiant, $mot_de_passe, $prenom, $nom, $mail);
         if($prepared_stmt->execute() === true){
             echo "<p class='alert alert-success'>Utilisateur ajouté avec succès.</p>";
         }else{

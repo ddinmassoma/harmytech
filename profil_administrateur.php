@@ -1,0 +1,475 @@
+<?php
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php?page=connexion");
+    exit;
+} elseif ($_SESSION['user_statut'] == 'utilisateur') {
+    $_SESSION['message_erreur'] = "Le statut d'administrateur est requis pour effectuer cette action.";
+    header("Location: index.php?page=accueil"); 
+    exit;
+}
+
+if (isset($_SESSION['message_erreur'])) {
+    echo "<div class='alert alert-error'>" . htmlspecialchars($_SESSION['message_erreur']) . "</div>";
+    unset($_SESSION['message_erreur']);
+}
+$prenom=$_SESSION['prenom'];
+$nom=$_SESSION['nom'];
+
+function affichage_user($row){
+    echo "<div class='product-card'>";
+        echo "<div class='product-body'>";
+            echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']).' '.htmlspecialchars($row['prenom'])."</h3>";
+            
+            echo "<div class='product-info-grid'>";
+                echo "<div class='info-item'><span>Identifiant :</span> <strong>" . htmlspecialchars($row['identifiant']) . "</strong></div>";
+                echo "<div class='info-item'><span>E-mail :</span> <strong>" . htmlspecialchars($row['mail']) . "</strong></div>";
+                echo "<div class='info-item'><span>Statut :</span> <strong>" . htmlspecialchars($row['statut']) . "</strong></div>";
+                echo "<div class='info-item'><span>Date de création du profil  :</span> <strong>" . htmlspecialchars($row['date']) . "</strong></div>";
+            echo "</div>";
+            
+            echo "<span class='product-id-badge'>ID: " . $row['id'] . "</span>";
+        echo "</div>";
+        echo "<div class='product-footer'>";
+            echo "<a href='index.php?page=modification_utilisateur&id=" . $row['id'] . "' class='btn-card btn-card-edit'>";
+                echo "Modifier le statut";
+            echo "</a>";
+            echo "<a href='index.php?page=supression_utilisateur&id=" . $row['id'] . "' class='btn-card btn-card-delete'>";
+                echo "Supprimer l'utilisateur";
+            echo "</a>";
+        echo "</div>";
+    echo "</div>";
+}
+?>
+
+<h1>Bienvenue <?php echo"$prenom $nom" ?> </h1>
+<div class="catalog-container">
+    
+    <div class="action-header">
+        <a href="index.php?page=ajout_utilisateur" class="btn btn-accent">
+            <span class="icon">+</span> Ajouter un utilisateur
+        </a>
+    </div>
+
+    <div class="search-filter-bar">
+        <form action="" method="post" class="search-form">
+            <input type="hidden" name="page" value="profil_administrateur">
+            <input 
+                type="text" 
+                placeholder="Entrez un nom..." 
+                name="search">
+            <button type="submit" name="recherche" class="btn btn-primary">Rechercher</button>
+            <button type="submit" name="reset" class="btn btn-primary">Reset</button>
+        </form>
+    </div>
+</div>
+
+<?php
+if(isset($_POST['recherche'])){
+    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+    $page = isset($_GET['subpage']) ? (int)$_GET['subpage'] : 1;
+    $recherche = $_POST['search'];
+    $id=$_SESSION['user_id'];
+    if ($page < 1) {
+        $page = 1;
+    }
+    $limit = 4;
+    $offset = ($page - 1) * $limit;
+
+    if ($connection_string->connect_error) {
+        echo "Erreur : impossible de se connecter à la base de donnée";
+        exit();
+    }
+    
+    $sql = "SELECT * 
+        FROM administrateur 
+        WHERE id != ? AND  (prenom = ? OR nom = ?) AND statut !='administrateur'
+        ORDER BY id
+        LIMIT $limit OFFSET $offset";
+    $prepared_stmt = $connection_string->prepare($sql);
+    $prepared_stmt->bind_param('iss', $id, $recherche,$recherche);
+    $prepared_stmt->execute();
+    $result = $prepared_stmt->get_result();
+
+    if ($result->num_rows === 0) {
+        echo "<div class='alert alert-error'>Aucun utilisateur ne posséde ce nom</div>";
+    } else {
+        while ($row = $result->fetch_assoc()) {
+            affichage_user($row);
+        }
+    }
+
+    $totalUser = $connection_string->query("SELECT COUNT(*) FROM administrateur WHERE id !=$id AND (prenom = '$recherche' OR nom = '$recherche') AND statut !='administrateur'")->fetch_row()[0];
+    $totalPages = ceil($totalUser / $limit);
+    for ($i = 1; $i <= $totalPages; $i++) {
+        if ($i == $page) {
+            echo ' ';
+            echo '<strong>' . $i . '</strong> ';
+        } else {
+            echo ' ';
+            echo '<a href="index.php?page=profil_administrateur&subpage=' . $i .'">' . $i .'</a>';
+        }
+    }
+
+    $prepared_stmt->close();
+    $connection_string->close();
+
+}elseif(isset($_POST['reset'])) {
+    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+    $page = isset($_GET['subpage']) ? (int)$_GET['subpage'] : 1;
+    $id=$_SESSION['user_id'];
+    if ($page < 1) {
+        $page = 1;
+    }
+    $limit = 4;
+    $offset = ($page - 1) * $limit;
+
+    if ($connection_string->connect_error) {
+        echo "Erreur : impossible de se connecter à la base de donnée";
+        exit();
+    }
+    
+    $sql = "SELECT * 
+            FROM administrateur 
+            WHERE id != $id AND statut !='administrateur'
+            ORDER BY id
+            LIMIT $limit OFFSET $offset";
+    $prepared_stmt = $connection_string->prepare($sql);
+    $prepared_stmt->execute();
+    $result = $prepared_stmt->get_result();
+
+    if ($result->num_rows === 0) {
+            echo "Aucun utilisateur trouvé";
+            exit();
+        } else {
+            while ($row = $result->fetch_assoc()) {
+                affichage_user($row);
+            }
+        }
+    $totalUser = $connection_string->query("SELECT COUNT(*) FROM administrateur WHERE id !=$id AND statut !='administrateur'")->fetch_row()[0];
+    $totalPages = ceil($totalUser / $limit);
+    for ($i = 1; $i <= $totalPages; $i++) {
+        if ($i == $page) {
+            echo ' ';
+            echo '<strong>' . $i . '</strong> ';
+        } else {
+            echo ' ';
+            echo '<a href="index.php?page=profil_administrateur&subpage=' . $i .'">' . $i .'</a>';
+        }
+    }
+
+    $prepared_stmt->close();
+    $connection_string->close();
+}else{
+    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+    $page = isset($_GET['subpage']) ? (int)$_GET['subpage'] : 1;
+    $id=$_SESSION['user_id'];
+    if ($page < 1) {
+        $page = 1;
+    }
+    $limit = 4;
+    $offset = ($page - 1) * $limit;
+
+    if ($connection_string->connect_error) {
+        echo "Erreur : impossible de se connecter à la base de donnée";
+        exit();
+    }
+    
+    $sql = "SELECT * 
+            FROM administrateur 
+            WHERE id != $id AND statut !='administrateur'
+            ORDER BY id
+            LIMIT $limit OFFSET $offset";
+    $prepared_stmt = $connection_string->prepare($sql);
+    $prepared_stmt->execute();
+    $result = $prepared_stmt->get_result();
+
+    if ($result->num_rows === 0) {
+            echo "Aucun utilisateur trouvé";
+            exit();
+        } else {
+            while ($row = $result->fetch_assoc()) {
+                affichage_user($row);
+            }
+        }
+    $totalUser = $connection_string->query("SELECT COUNT(*) FROM administrateur WHERE id !=$id AND statut !='administrateur'")->fetch_row()[0];
+    $totalPages = ceil($totalUser / $limit);
+    for ($i = 1; $i <= $totalPages; $i++) {
+        if ($i == $page) {
+            echo ' ';
+            echo '<strong>' . $i . '</strong> ';
+        } else {
+            echo ' ';
+            echo '<a href="index.php?page=profil_administrateur&subpage=' . $i .'">' . $i .'</a>';
+        }
+    }
+
+    $prepared_stmt->close();
+    $connection_string->close();
+}
+?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+:root {
+    --color-dark-bg: #0b132b;    
+    --color-accent: #5e5ce6;     
+    --color-accent-hover: #4a48c6;
+    --color-text-main: #1f2937;  
+    --color-border: #d1d5db;     
+    --color-light-bg: #f8fafc;
+    --color-danger: #ef4444;       
+    --color-danger-hover: #dc2626;
+    --color-muted: #6b7280; 
+}
+
+/* --- Conteneur Général --- */
+.catalog-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    color: var(--color-text-main);
+}
+
+/* --- Alignement des barres --- */
+.action-header {
+    margin-bottom: 25px;
+}
+
+.search-filter-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid #edf2f7;
+    margin-bottom: 30px;
+}
+
+@media (min-width: 768px) {
+    .search-filter-bar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+/* --- Formulaires --- */
+.search-form, .filter-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.select-wrapper {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* --- Inputs & Selects stylisés --- */
+.search-filter-bar input[type="text"],
+.search-filter-bar select {
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background-color: var(--color-light-bg);
+    color: var(--color-text-main);
+    outline: none;
+    transition: all 0.2s ease-in-out;
+    min-width: 180px;
+}
+
+.search-filter-bar input[type="text"]:focus,
+.search-filter-bar select:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(94, 92, 230, 0.15);
+    background-color: #ffffff;
+}
+
+/* --- Boutons Stylisés --- */
+.btn {
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary {
+    background-color: var(--color-dark-bg);
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: #1c2541;
+    transform: translateY(-1px);
+}
+
+.btn-accent {
+    background-color: var(--color-accent);
+    color: #ffffff;
+}
+
+.btn-accent:hover {
+    background-color: var(--color-accent-hover);
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.icon {
+    margin-right: 6px;
+    font-weight: bold;
+}
+
+/* --- La Carte Produit --- */
+.product-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    max-width: 450px;
+    margin: 20px 0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* --- Corps de la carte --- */
+.product-body {
+    padding: 20px;
+    position: relative;
+}
+
+.product-title {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: var(--color-dark-bg); 
+    border-bottom: 2px solid var(--color-accent);
+    padding-bottom: 8px;
+}
+
+/* Grille d'informations internes */
+.product-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.info-item {
+    font-size: 14px;
+    color: var(--color-text-main);
+    display: flex;
+    justify-content: space-between; 
+}
+
+.info-item span {
+    color: var(--color-muted);
+}
+
+.product-ref {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+/* Badge ID discret en haut à droite */
+.product-id-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #f1f5f9;
+    color: var(--color-muted);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+.product-footer {
+    background: #f8fafc;
+    padding: 12px 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end; /* Aligne les boutons à droite */
+    border-top: 1px solid #edf2f7;
+}
+
+/* Style de base des boutons de carte */
+.btn-card {
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+/* Bouton Modifier */
+.btn-card-edit {
+    background-color: var(--color-dark-bg);
+    color: #ffffff;
+}
+
+.btn-card-edit:hover {
+    background-color: #1c2541;
+}
+
+/* Bouton Supprimer */
+.btn-card-delete {
+    background-color: transparent;
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger);
+}
+
+.btn-card-delete:hover {
+    background-color: var(--color-danger);
+    color: #ffffff;
+}
+
+/* --- Style des Messages d'Alerte (Succès / Erreur) --- */
+.alert {
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    border-left: 5px solid transparent;
+}
+
+/* Alerte Erreur */
+.alert-error {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border-color: #ef4444;
+}
+</style>

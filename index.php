@@ -21,10 +21,12 @@ if (isset($_SESSION['user_id'])) {
     <body>
         <header>
             <h1>Catalogue Harmytech</h1>
-            <nav>
+            <nav> 
                 <?php
                     if (isset($_SESSION['user_id'])) {
                         echo "<a href='deconnexion.php' class='deconnexion'>Se déconnecter</a>";
+                        echo "<a href='index.php?page=profil_administrateur' class='profil'>Gestion des profils</a>";
+                        echo "<a href='index.php?page=accueil' class='accueil'>Accueil</a>";
                     }
                 ?>
             </nav>
@@ -49,6 +51,18 @@ if (isset($_SESSION['user_id'])) {
                         break;
                     case 'création_compte':
                         include 'création_compte.php';
+                        break;
+                    case 'profil_administrateur':
+                        include 'profil_administrateur.php';
+                        break;
+                    case 'ajout_utilisateur':
+                        include 'ajout_utilisateur.php';
+                        break;
+                    case 'modification_utilisateur' :
+                        include 'modification_utilisateur.php';
+                        break;
+                    case 'supression_utilisateur':
+                        include 'supression_utilisateur.php';
                         break;
                     default:
                         include 'configuration/404.php';

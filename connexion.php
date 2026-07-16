@@ -9,7 +9,7 @@ if (isset($_POST['connexion'])) {
     $identifiant = $_POST['identifiant'] ?? '';
     $mot_de_passe = $_POST['mot_de_passe'] ?? '';
 
-    $sql = "SELECT id, statut, mot_de_passe FROM administrateur WHERE identifiant = ?";       
+    $sql = "SELECT id, statut, mot_de_passe, prenom, nom FROM administrateur WHERE identifiant = ?";       
     $prepared_stmt = $connection_string->prepare($sql);
     $prepared_stmt->bind_param('s', $identifiant);
     $prepared_stmt->execute();
@@ -20,6 +20,8 @@ if (isset($_POST['connexion'])) {
         if ($mot_de_passe === $user['mot_de_passe']) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_statut'] = $user['statut'];
+            $_SESSION['nom'] = $user['nom'];
+            $_SESSION['prenom'] = $user['prenom'];
             $prepared_stmt->close();
             $connection_string->close();
             header("Location: index.php?page=accueil");
