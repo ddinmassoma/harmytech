@@ -7,77 +7,11 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: index.php?page=accueil"); 
     exit;
 }
+$secret = "une_cle_secrete_tres_longue_et_complexe_cote_serveur";
+$id_recu = $_GET['id'];
+$signature_recue = $_GET['sig'];
+$signature_attendue = hash_hmac('sha256', $id_recu, $secret);
 ?>
-
-<h1>Supprimer un profil</h1>
-
-<?php
-$connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-$id = $_GET['id'];
-$sql = "SELECT * FROM administrateur WHERE id = ?";
-if (isset($_GET['id'])) {
-    if($id == $_SESSION['user_id']){
-        $_SESSION['message_erreur'] = "Vous ne pouvez pas votre propre profil.";
-        header("Location: index.php?page=profil_administrateur"); 
-        exit();
-    }
-    $prepared_stmt = $connection_string->prepare($sql);
-    $prepared_stmt->bind_param('i', $id);
-    $prepared_stmt->execute();
-    $result = $prepared_stmt->get_result();
-    $row = $result->fetch_assoc();
-    if ($result->num_rows != 1) {
-            header("Location: index.php?page=profil_administrateur");
-            exit();   
-    }
-
-    if (isset($_POST['supprimer'])) {
-    $prepared_stmt = $connection_string->prepare($sql);
-    $prepared_stmt->bind_param('i', $id);
-    if ($prepared_stmt->execute() === true) {
-        echo "<p class='alert alert-success'>Utilisateur supprimer avec succés</p>";
-        echo "<a href='index.php?page=profil_administrateur' class='btn-card btn-card-back'>";
-            echo "Retour";
-        echo "</a>";
-    } else {
-        echo "<p class='alert alert-error'>Erreur lors de la suppression de l'utilisateur.</p>";
-        echo "<a href='index.php?page=profil_administrateur' class='btn-card btn-card-back'>";
-            echo "Retour";
-        echo "</a>";
-    }
-    $prepared_stmt->close();
-    $connection_string->close();
-    } else{
-            echo "<div class='product-card'>";
-                echo "<div class='product-body'>";
-                    echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) .' '. htmlspecialchars($row['prenom']) . "</h3>";
-                    
-                    echo "<div class='product-info-grid'>";
-                        echo "<div class='info-item'><span>Identifiant :</span> <strong>" . htmlspecialchars($row['identifiant']) . "</strong></div>";
-                        echo "<div class='info-item'><span>E-mail :</span> <strong>" . htmlspecialchars($row['mail']) . "</strong></div>";
-                        echo "<div class='info-item'><span>Statut :</span> <strong>" . htmlspecialchars($row['statut']) . "</strong></div>";
-                        echo "<div class='info-item'><span>Date de création du profil  :</span> <strong>" . htmlspecialchars($row['date']) . "</strong></div>";
-                    echo "</div>";
-                    echo "<span class='product-id-badge'>ID: " . $row['id'] . "</span>";
-                echo "</div>";
-
-                echo "<p class='alert alert-advetissement'>Êtes-vous sûr de vouloir supprimer ce profil ?</p>"."<br/>";
-                
-                echo "<div class='product-footer'>";
-                    echo "<a href='index.php?page=profil_administrateur' class='btn-card btn-card-back'>";
-                        echo "Retour";
-                    echo "</a>";
-                    echo"<form action='' method='post'>";
-                        echo"<button type='submit' name='supprimer' class='btn-form btn-form-submit'>Supprimer l'utilisateur</button>";
-                    echo "</form>";
-                echo "</div>";
-            echo "</div>";
-    }
-}else {
-    echo "<p class='alert alert-error'>Aucun utilisateur trouvé.</p>";
-}
-?>
-
 <style>
 :root {
     --color-dark-bg: #0b132b;    
@@ -248,4 +182,83 @@ if (isset($_GET['id'])) {
     color: #fa8e00;
     border-color: #e7782e;
 }
+
+.deconnexion{
+    color : red;
+    text-decoration-style: solid;
+}
 </style>
+
+<h1>Supprimer un profil</h1>
+
+<?php
+if ($signature_attendue!=$signature_recue) {
+    http_response_code(403);
+    echo "<p class='alert alert-error'>URL invalide ou falsifiée</p>";
+    die();
+}
+$connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+$id = $_GET['id'];
+$sql = "SELECT * FROM administrateur WHERE id = ?";
+if (isset($_GET['id'])) {
+    if($id == $_SESSION['user_id']){
+        $_SESSION['message_erreur'] = "Vous ne pouvez pas votre propre profil.";
+        header("Location: index.php?page=profil_administrateur"); 
+        exit();
+    }
+    $prepared_stmt = $connection_string->prepare($sql);
+    $prepared_stmt->bind_param('i', $id);
+    $prepared_stmt->execute();
+    $result = $prepared_stmt->get_result();
+    $row = $result->fetch_assoc();
+    if ($result->num_rows != 1) {
+            header("Location: index.php?page=profil_administrateur");
+            exit();   
+    }
+
+    if (isset($_POST['supprimer'])) {
+    $prepared_stmt = $connection_string->prepare($sql);
+    $prepared_stmt->bind_param('i', $id);
+    if ($prepared_stmt->execute() === true) {
+        echo "<p class='alert alert-success'>Utilisateur supprimer avec succés</p>";
+        echo "<a href='index.php?page=profil_administrateur' class='btn-card btn-card-back'>";
+            echo "Retour";
+        echo "</a>";
+    } else {
+        echo "<p class='alert alert-error'>Erreur lors de la suppression de l'utilisateur.</p>";
+        echo "<a href='index.php?page=profil_administrateur' class='btn-card btn-card-back'>";
+            echo "Retour";
+        echo "</a>";
+    }
+    $prepared_stmt->close();
+    $connection_string->close();
+    } else{
+            echo "<div class='product-card'>";
+                echo "<div class='product-body'>";
+                    echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) .' '. htmlspecialchars($row['prenom']) . "</h3>";
+                    
+                    echo "<div class='product-info-grid'>";
+                        echo "<div class='info-item'><span>Identifiant :</span> <strong>" . htmlspecialchars($row['identifiant']) . "</strong></div>";
+                        echo "<div class='info-item'><span>E-mail :</span> <strong>" . htmlspecialchars($row['mail']) . "</strong></div>";
+                        echo "<div class='info-item'><span>Statut :</span> <strong>" . htmlspecialchars($row['statut']) . "</strong></div>";
+                        echo "<div class='info-item'><span>Date de création du profil  :</span> <strong>" . htmlspecialchars($row['date']) . "</strong></div>";
+                    echo "</div>";
+                    echo "<span class='product-id-badge'>ID: " . $row['id'] . "</span>";
+                echo "</div>";
+
+                echo "<p class='alert alert-advetissement'>Êtes-vous sûr de vouloir supprimer ce profil ?</p>"."<br/>";
+                
+                echo "<div class='product-footer'>";
+                    echo "<a href='index.php?page=profil_administrateur' class='btn-card btn-card-back'>";
+                        echo "Retour";
+                    echo "</a>";
+                    echo"<form action='' method='post'>";
+                        echo"<button type='submit' name='supprimer' class='btn-form btn-form-submit'>Supprimer l'utilisateur</button>";
+                    echo "</form>";
+                echo "</div>";
+            echo "</div>";
+    }
+}else {
+    echo "<p class='alert alert-error'>Aucun utilisateur trouvé.</p>";
+}
+?>

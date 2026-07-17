@@ -17,7 +17,7 @@ if(isset($POST['reset'])){
     header('Location : index.php?page=profil_administrateur');
 }
 
-function affichage_user($row){
+function affichage_user($row, $signature){
     echo "<div class='product-card'>";
         echo "<div class='product-body'>";
             echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']).' '.htmlspecialchars($row['prenom'])."</h3>";
@@ -32,10 +32,10 @@ function affichage_user($row){
             echo "<span class='product-id-badge'>ID: " . $row['id'] . "</span>";
         echo "</div>";
         echo "<div class='product-footer'>";
-            echo "<a href='index.php?page=modification_utilisateur&id=" . $row['id'] . "' class='btn-card btn-card-edit'>";
+            echo "<a href='index.php?page=modification_utilisateur&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-edit'>";
                 echo "Modifier le statut";
             echo "</a>";
-            echo "<a href='index.php?page=supression_utilisateur&id=" . $row['id'] . "' class='btn-card btn-card-delete'>";
+            echo "<a href='index.php?page=supression_utilisateur&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-delete'>";
                 echo "Supprimer l'utilisateur";
             echo "</a>";
         echo "</div>";
@@ -60,7 +60,9 @@ function affichage($result){
         echo "<div class='alert alert-error'>Aucun utilisateur trouvé</div>";
     } else {
         while ($row = $result->fetch_assoc()) {
-            affichage_user($row);
+            $secret = "une_cle_secrete_tres_longue_et_complexe_cote_serveur";
+            $signature = hash_hmac('sha256', $row['id'], $secret);
+            affichage_user($row,$signature);
         }
     }
 }
@@ -179,9 +181,9 @@ function value(){
 $mois = $_POST['mois']??'%';
 $annee = $_POST['annee']??'%';
 $lettre = $_POST['lettre']??'%';
+[$connection_string, $page, $id, $limit, $offset] = value();
 
 if(isset($_POST['recherche'])){
-    [$connection_string, $page, $id, $limit, $offset] = value();
     $recherche = $_POST['search'];
     $sql = "SELECT * 
         FROM administrateur 
@@ -201,8 +203,7 @@ if(isset($_POST['recherche'])){
     affichage_numero($totalUser, $limit, $page);
 
     close($prepared_stmt,$connection_string);
-}else{
-    [$connection_string, $page, $id, $limit, $offset] = value();   
+}else{  
     $sql = "SELECT * 
             FROM administrateur 
             WHERE id != $id 

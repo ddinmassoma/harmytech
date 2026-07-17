@@ -71,12 +71,26 @@ function ajouter($nom, $prenom, $mail, $identifiant,$mot_de_passe,$connection){
     $sql = "INSERT INTO administrateur (nom, prenom, mail, identifiant, mot_de_passe) VALUES (?, ?, ?, ?, ?)";
     $prepared_stmt = $connection->prepare($sql);
     $prepared_stmt->bind_param('sssss', $nom, $prenom, $mail, $identifiant,$mot_de_passe);
-    if ($prepared_stmt->execute() === false) {
+    $result = verification($mail, $identifiant, $connection);
+    if($result->num_rows === 1){
+        echo "<p class='alert alert-error'>Erreur : l'e-mail ou l'identifiant est déjà utilisé.</p>";
+    }else{
+        if ($prepared_stmt->execute() === false) {
         echo "<p class='alert alert-error'>Erreur lors de l'ajout de l'utilisateur</p>";
-    } else {
-        echo "<p class='alert alert-success'>Utilisateur ajouté avec succès.</p>";
-        $prepared_stmt->close();
+        } else {
+            echo "<p class='alert alert-success'>Utilisateur ajouté avec succès.</p>";
+            $prepared_stmt->close();
+        }
     }
+}
+
+function verification($mail, $identifiant, $connection){
+    $sql = "SELECT * FROM administrateur WHERE mail = ? AND identifiant = ?";
+    $prepared_stmt = $connection->prepare($sql);
+    $prepared_stmt->bind_param('ss', $mail, $identifiant);
+    $prepared_stmt->execute();
+    $result = $prepared_stmt->get_result();
+    return $result;
 }
 
 if(isset($_GET['list_user'])){

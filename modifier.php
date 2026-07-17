@@ -7,6 +7,49 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: index.php?page=accueil"); 
     exit;
 }
+
+$secret = "une_cle_secrete_tres_longue_et_complexe_cote_serveur";
+$id_recu = $_GET['id'];
+$signature_recue = $_GET['sig'];
+$signature_attendue = hash_hmac('sha256', $id_recu, $secret);
+?>
+
+<style>
+.alert {
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    border-left: 5px solid transparent;
+}
+
+/* Alerte Réussite */
+.alert-success {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border-color: #10b981;
+}
+
+/* Alerte Erreur */
+.alert-error {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border-color: #ef4444;
+}
+
+.deconnexion{
+    color : red;
+    text-decoration-style: solid;
+}
+</style>
+
+<?php 
+if ($signature_attendue!=$signature_recue) {
+    http_response_code(403);
+    echo "<p class='alert alert-error'>URL invalide ou falsifiée</p>";
+    die();
+}
 ?>
 
 <div class="form-container">

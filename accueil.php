@@ -74,7 +74,7 @@ function sql($limit, $offset, $couleur, $marque, $memoire){
     return $sql;
 } 
 
-function affichage_produit($row){
+function affichage_produit($row,$signature){
     echo "<div class='product-card'>";
         echo "<div class='product-body'>";
             echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) . "</h3>";
@@ -90,14 +90,26 @@ function affichage_produit($row){
             echo "<span class='product-id-badge'>ID: " . $row['id'] . "</span>";
         echo "</div>";
         echo "<div class='product-footer'>";
-            echo "<a href='index.php?page=modifier&id=" . $row['id'] . "' class='btn-card btn-card-edit'>";
+            echo "<a href='index.php?page=modifier&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-edit'>";
                 echo "Modifier";
             echo "</a>";
-            echo "<a href='index.php?page=supprimer&id=" . $row['id'] . "' class='btn-card btn-card-delete'>";
+            echo "<a href='index.php?page=supprimer&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-delete'>";
                 echo "Supprimer";
             echo "</a>";
         echo "</div>";
     echo "</div>";
+}
+
+function affichage($result){
+    if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $secret = "une_cle_secrete_tres_longue_et_complexe_cote_serveur";
+                $signature = hash_hmac('sha256', $row['id'], $secret);
+                affichage_produit($row,$signature);
+            }
+        } else {
+            echo "<div class='alert alert-error'>Aucun produit trouvé</div>";
+        }
 }
 ?>
 
@@ -182,13 +194,7 @@ $memoire = $_GET['memoire']??'';
         $prepared_stmt->execute();
         $result = $prepared_stmt->get_result();
 
-        if ($result->num_rows === 0) {
-            echo "Aucun produit trouvé";
-        } else {
-            while ($row = $result->fetch_assoc()) {
-                affichage_produit($row);
-            }
-        }
+        affichage($result);
 
         $totalArticles = $connection_string->query("SELECT COUNT(*) FROM base_de_donn__e___harmytech___feuille_1 WHERE nom LIKE '$searchString'")->fetch_row()[0];
         pages($totalArticles, $limit, $page);
@@ -199,13 +205,7 @@ $memoire = $_GET['memoire']??'';
                 
         $result = $connection_string->query($sql);
 
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                affichage_produit($row);
-            }
-        } else {
-            echo "<div class='alert alert-error'>Aucun produit trouvé</div>";
-        }
+        affichage($result);
 
         $totalArticles = $connection_string->query("SELECT COUNT(*) FROM base_de_donn__e___harmytech___feuille_1 WHERE marque LIKE '%$marque%' AND couleur LIKE '%$couleur%' AND memoire LIKE '%$memoire%'")->fetch_row()[0];
         pages($totalArticles, $limit, $page);

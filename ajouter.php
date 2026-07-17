@@ -76,12 +76,26 @@ function ajouter($connection,$marque,$nom,$couleur,$reference,$model,$memoire){
     $sql = "INSERT INTO base_de_donn__e___harmytech___feuille_1 (nom, marque, couleur, memoire, model, reference) VALUES (?, ?, ?, ?, ?, ?)";
     $prepared_stmt = $connection->prepare($sql);
     $prepared_stmt->bind_param('ssssss', $nom, $marque, $couleur, $memoire, $model, $reference);
-    if ($prepared_stmt->execute() === false) {
+    $result=verification($reference, $nom, $connection);
+    if($result->num_rows === 1){
+        echo "<p class='alert alert-error'>Erreur : le nom ou la référence du produit est déjà utilisé.</p>";
+    }else{
+        if ($prepared_stmt->execute() === false) {
         echo "<p class='alert alert-error'>Erreur lors de l'ajout du produit \"".htmlspecialchars($nom)."\".</p>";
-    } else {
-        echo "<p class='alert alert-success'>Produit \"".htmlspecialchars($nom)."\" ajouté avec succès.</p>";
-        $prepared_stmt->close();
+        } else {
+            echo "<p class='alert alert-success'>Produit \"".htmlspecialchars($nom)."\" ajouté avec succès.</p>";
+            $prepared_stmt->close();
+        }
     }
+}
+
+function verification($reference, $nom, $connection){
+    $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE reference = ? AND nom = ?";
+    $prepared_stmt = $connection->prepare($sql);
+    $prepared_stmt->bind_param('ss', $reference, $nom);
+    $prepared_stmt->execute();
+    $result = $prepared_stmt->get_result();
+    return $result;
 }
 
 if(isset($_GET['list_ajout'])){

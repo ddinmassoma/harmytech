@@ -7,86 +7,12 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: index.php?page=accueil"); 
     exit;
 }
+
+$secret = "une_cle_secrete_tres_longue_et_complexe_cote_serveur";
+$id_recu = $_GET['id'];
+$signature_recue = $_GET['sig'];
+$signature_attendue = hash_hmac('sha256', $id_recu, $secret);
 ?>
-
-<div class="form-container">
-    <h1 class="form-title">Modifier le statut d'un utilisateur</h1>
-
-    <?php
-    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-    $id = $_GET['id'];
-    $statut = $_POST['statut']??'';
-        if (isset($_GET['id'])) {
-            if($id == $_SESSION['user_id']){
-                $_SESSION['message_erreur'] = "Vous ne pouvez pas modifier votre propre statut.";
-                header("Location: index.php?page=profil_administrateur"); 
-                exit();
-            }else{
-                $sql = "SELECT * FROM administrateur WHERE id = ?";
-                $prepared_stmt = $connection_string->prepare($sql);
-                $prepared_stmt->bind_param('i', $id);
-                $prepared_stmt->execute();
-                $result = $prepared_stmt->get_result();
-                $row = $result->fetch_assoc();
-                if ($result->num_rows != 1) {
-                    header("Location: index.php?page=profil_administrateur");
-                    exit();   
-                }
-            }} 
-        if(isset($_POST['modifier'])){
-            $sql = "UPDATE administrateur SET statut = ? WHERE id = ?";
-            $prepared_stmt = $connection_string->prepare($sql);
-            $prepared_stmt->bind_param('si', $statut, $id);
-            if($statut != 'administrateur' && $statut!= 'utilisateur'){
-                echo "<p class='alert alert-error'>Erreur lors de la modification du statut : vous devez mettre 'utilisateur' ou 'administrateur'.</p>";
-                $connection_string->close();
-            }else{
-                if ($prepared_stmt->execute() === true) {
-                    echo "<p class='alert alert-success'>Statut modifié avec succès.</p>";
-                    $row['statut'] = $statut;
-                } else {
-                    echo "<p class='alert alert-error'>Erreur lors de la modification du statut.</p>";
-                }
-                $prepared_stmt->close();
-                $connection_string->close();
-            }
-        }
-    ?>
-    
-<form action="" method="post" class="product-form">
-    <div class="form-grid">
-        <div class="input-group">
-            <input type="text" name="nom" value="<?php echo isset($row['nom']) ? htmlspecialchars($row['nom']) : '';?>" disabled>
-        </div>
-
-        <div class="input-group">
-            <input type="text" name="prenom" value="<?php echo isset($row['prenom']) ? htmlspecialchars($row['prenom']) : '';?>" disabled>
-        </div>
-        
-        <div class="input-group">
-            <input type="text" name="identifiant" class="input-group" value="<?php echo isset($row['identifiant']) ? htmlspecialchars($row['identifiant']) : '';?>" disabled>
-        </div>
-
-        <div class="input-group">
-            <input type="text" name="mail" class="input-group" value="<?php echo isset($row['mail']) ? htmlspecialchars($row['mail']) : ''; ?>" disabled>
-        </div>
-        
-        <div class="input-group">
-            <input type="text" name="date" class="input-group" value="<?php echo isset($row['date']) ? htmlspecialchars($row['date']) : ''; ?>" disabled>
-        </div>
-
-        <div class="input-group">
-            <input type="text" name="statut" class="input-group" value="<?php echo isset($row['statut']) ? htmlspecialchars($row['statut']) : ''; ?>">
-        </div>
-    </div>
-
-    <div class="form-actions">
-        <button type="submit" name="modifier" class="btn-form btn-form-submit">Modifier</button>
-        <a href="index.php?page=profil_administrateur" class="btn-form btn-form-back">Retour</a>
-    </div>
-    
-</form>
-
 
 <style>
 :root {
@@ -235,4 +161,96 @@ if (!isset($_SESSION['user_id'])) {
     color: #991b1b;
     border-color: #ef4444;
 }
+
+.deconnexion{
+    color : red;
+    text-decoration-style: solid;
+}
 </style>
+
+<?php
+    if ($signature_attendue!=$signature_recue) {
+    http_response_code(403);
+    echo "<p class='alert alert-error'>URL invalide ou falsifiée</p>";
+    die();
+    }else{
+        $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+        $id = $_GET['id'];
+        $statut = $_POST['statut']??'';
+        if (isset($_GET['id'])) {
+            if($id == $_SESSION['user_id']){
+                $_SESSION['message_erreur'] = "Vous ne pouvez pas modifier votre propre statut.";
+                header("Location: index.php?page=profil_administrateur"); 
+                exit();
+            }else{
+                $sql = "SELECT * FROM administrateur WHERE id = ?";
+                $prepared_stmt = $connection_string->prepare($sql);
+                $prepared_stmt->bind_param('i', $id);
+                $prepared_stmt->execute();
+                $result = $prepared_stmt->get_result();
+                $row = $result->fetch_assoc();
+                if ($result->num_rows != 1) {
+                    header("Location: index.php?page=profil_administrateur");
+                    exit();   
+                }
+            }} 
+        if(isset($_POST['modifier'])){
+            $sql = "UPDATE administrateur SET statut = ? WHERE id = ?";
+            $prepared_stmt = $connection_string->prepare($sql);
+            $prepared_stmt->bind_param('si', $statut, $id);
+            if($statut != 'administrateur' && $statut!= 'utilisateur'){
+                echo "<p class='alert alert-error'>Erreur lors de la modification du statut : vous devez mettre 'utilisateur' ou 'administrateur'.</p>";
+                $connection_string->close();
+            }else{
+                if ($prepared_stmt->execute() === true) {
+                    echo "<p class='alert alert-success'>Statut modifié avec succès.</p>";
+                    $row['statut'] = $statut;
+                } else {
+                    echo "<p class='alert alert-error'>Erreur lors de la modification du statut.</p>";
+                }
+                $prepared_stmt->close();
+                $connection_string->close();
+            }
+        }
+    }
+?>
+
+<div class="form-container">
+    <h1 class="form-title">Modifier le statut d'un utilisateur</h1>
+    <form action="" method="post" class="product-form">
+        <div class="form-grid">
+            <div class="input-group">
+                <input type="text" name="nom" value="<?php echo isset($row['nom']) ? htmlspecialchars($row['nom']) : '';?>" disabled>
+            </div>
+
+            <div class="input-group">
+                <input type="text" name="prenom" value="<?php echo isset($row['prenom']) ? htmlspecialchars($row['prenom']) : '';?>" disabled>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" name="identifiant" class="input-group" value="<?php echo isset($row['identifiant']) ? htmlspecialchars($row['identifiant']) : '';?>" disabled>
+            </div>
+
+            <div class="input-group">
+                <input type="text" name="mail" class="input-group" value="<?php echo isset($row['mail']) ? htmlspecialchars($row['mail']) : ''; ?>" disabled>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" name="date" class="input-group" value="<?php echo isset($row['date']) ? htmlspecialchars($row['date']) : ''; ?>" disabled>
+            </div>
+
+            <div class="input-group">
+                <input type="text" name="statut" class="input-group" value="<?php echo isset($row['statut']) ? htmlspecialchars($row['statut']) : ''; ?>">
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" name="modifier" class="btn-form btn-form-submit">Modifier</button>
+            <a href="index.php?page=profil_administrateur" class="btn-form btn-form-back">Retour</a>
+        </div>
+        
+    </form>
+</div>
+
+
+
