@@ -13,9 +13,10 @@ if (!isset($_SESSION['user_id'])) {
     <h1 class="form-title">Modifier le statut d'un utilisateur</h1>
 
     <?php
+    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+    $id = $_GET['id'];
+    $statut = $_POST['statut']??'';
         if (isset($_GET['id'])) {
-            $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-            $id = $_GET['id'];
             if($id == $_SESSION['user_id']){
                 $_SESSION['message_erreur'] = "Vous ne pouvez pas modifier votre propre statut.";
                 header("Location: index.php?page=profil_administrateur"); 
@@ -31,19 +32,14 @@ if (!isset($_SESSION['user_id'])) {
                     header("Location: index.php?page=profil_administrateur");
                     exit();   
                 }
-            }
-            }
-    ?>
-    <?php 
+            }} 
         if(isset($_POST['modifier'])){
-            $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-            $id = $_GET['id'];
-            $statut = $_POST['statut'];
             $sql = "UPDATE administrateur SET statut = ? WHERE id = ?";
             $prepared_stmt = $connection_string->prepare($sql);
             $prepared_stmt->bind_param('si', $statut, $id);
             if($statut != 'administrateur' && $statut!= 'utilisateur'){
                 echo "<p class='alert alert-error'>Erreur lors de la modification du statut : vous devez mettre 'utilisateur' ou 'administrateur'.</p>";
+                $connection_string->close();
             }else{
                 if ($prepared_stmt->execute() === true) {
                     echo "<p class='alert alert-success'>Statut modifié avec succès.</p>";

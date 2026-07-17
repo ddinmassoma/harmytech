@@ -15,7 +15,7 @@ if (!isset($_SESSION['user_id'])) {
         <input type="hidden" name="page" value="ajout_utilisateur">
         <div class="select-wrapper">
             <select name="nb_user">
-                <option value="1">-- Entrer le nombre d'utilisateur' à ajouter --</option>
+                <option value="1">-- Entrer le nombre d'utilisateur à ajouter --</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
                 <option value="4">4</option>
@@ -75,6 +75,7 @@ function ajouter($nom, $prenom, $mail, $identifiant,$mot_de_passe,$connection){
         echo "<p class='alert alert-error'>Erreur lors de l'ajout de l'utilisateur</p>";
     } else {
         echo "<p class='alert alert-success'>Utilisateur ajouté avec succès.</p>";
+        $prepared_stmt->close();
     }
 }
 

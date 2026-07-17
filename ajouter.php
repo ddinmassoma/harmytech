@@ -80,6 +80,7 @@ function ajouter($connection,$marque,$nom,$couleur,$reference,$model,$memoire){
         echo "<p class='alert alert-error'>Erreur lors de l'ajout du produit \"".htmlspecialchars($nom)."\".</p>";
     } else {
         echo "<p class='alert alert-success'>Produit \"".htmlspecialchars($nom)."\" ajouté avec succès.</p>";
+        $prepared_stmt->close();
     }
 }
 

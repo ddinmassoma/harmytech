@@ -12,15 +12,15 @@ if (!isset($_SESSION['user_id'])) {
 <h1>Supprimer un profil</h1>
 
 <?php
+$connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+$id = $_GET['id'];
+$sql = "SELECT * FROM administrateur WHERE id = ?";
 if (isset($_GET['id'])) {
-    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-    $id = $_GET['id'];
     if($id == $_SESSION['user_id']){
         $_SESSION['message_erreur'] = "Vous ne pouvez pas votre propre profil.";
         header("Location: index.php?page=profil_administrateur"); 
         exit();
     }
-    $sql = "SELECT * FROM administrateur WHERE id = ?";
     $prepared_stmt = $connection_string->prepare($sql);
     $prepared_stmt->bind_param('i', $id);
     $prepared_stmt->execute();
@@ -32,8 +32,6 @@ if (isset($_GET['id'])) {
     }
 
     if (isset($_POST['supprimer'])) {
-    $id = $_GET['id'];
-    $sql = "DELETE FROM administrateur WHERE id = ?";
     $prepared_stmt = $connection_string->prepare($sql);
     $prepared_stmt->bind_param('i', $id);
     if ($prepared_stmt->execute() === true) {
@@ -76,7 +74,7 @@ if (isset($_GET['id'])) {
             echo "</div>";
     }
 }else {
-    echo "Aucun produit trouvé.";
+    echo "<p class='alert alert-error'>Aucun utilisateur trouvé.</p>";
 }
 ?>
 

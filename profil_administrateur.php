@@ -12,8 +12,10 @@ if (isset($_SESSION['message_erreur'])) {
     echo "<div class='alert alert-error'>" . htmlspecialchars($_SESSION['message_erreur']) . "</div>";
     unset($_SESSION['message_erreur']);
 }
-$prenom=$_SESSION['prenom'];
-$nom=$_SESSION['nom'];
+
+if(isset($POST['reset'])){
+    header('Location : index.php?page=profil_administrateur');
+}
 
 function affichage_user($row){
     echo "<div class='product-card'>";
@@ -39,9 +41,54 @@ function affichage_user($row){
         echo "</div>";
     echo "</div>";
 }
+
+function affichage_numero($totalUser, $limit, $page){
+    $totalPages = ceil($totalUser / $limit);
+    for ($i = 1; $i <= $totalPages; $i++) {
+        if ($i == $page) {
+            echo ' ';
+            echo '<strong>' . $i . '</strong> ';
+        } else {
+            echo ' ';
+            echo '<a href="index.php?page=profil_administrateur&subpage=' . $i .'">' . $i .'</a>';
+        }
+    }
+}
+
+function affichage($result){
+    if ($result->num_rows === 0) {
+        echo "<div class='alert alert-error'>Aucun utilisateur trouvé</div>";
+    } else {
+        while ($row = $result->fetch_assoc()) {
+            affichage_user($row);
+        }
+    }
+}
+
+function close($prepared_stmt,$connection_string){
+    $prepared_stmt->close();
+    $connection_string->close();
+}
+
+function value(){
+    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+    $page = isset($_GET['subpage']) ? (int)$_GET['subpage'] : 1;
+    $id=$_SESSION['user_id'];
+    if ($page < 1) {
+        $page = 1;
+    }
+    $limit = 4;
+    $offset = ($page - 1) * $limit;
+    if ($connection_string->connect_error) {
+        echo "<div class='alert alert-error'>Erreur : impossible de se connecter à la base de donnée</div>";
+        exit();
+    }
+
+    return [$connection_string, $page, $id, $limit, $offset];
+}
 ?>
 
-<h1>Bienvenue <?php echo"$prenom $nom" ?> </h1>
+<h1>Gestion des profils </h1>
 <div class="catalog-container">
     
     <div class="action-header">
@@ -60,165 +107,127 @@ function affichage_user($row){
             <button type="submit" name="recherche" class="btn btn-primary">Rechercher</button>
             <button type="submit" name="reset" class="btn btn-primary">Reset</button>
         </form>
+
+        <form method="post" action="" class="filter-form">
+            <input type="hidden" name="page" value="profil_administrateur">
+             
+            <div class="select-wrapper">
+                <select name="lettre">
+                    <option value="%">-- Filtrer par lettre --</option>
+                    <option value="a">a</option>
+                    <option value="b">b</option>
+                    <option value="c">c</option>
+                    <option value="d">d</option>
+                    <option value="e">e</option>
+                    <option value="f">f</option>
+                    <option value="g">g</option>
+                    <option value="h">h</option>
+                    <option value="i">i</option>
+                    <option value="j">j</option>
+                    <option value="k">k</option>
+                    <option value="l">l</option>
+                    <option value="m">m</option>
+                    <option value="n">n</option>
+                    <option value="o">o</option>
+                    <option value="p">p</option>
+                    <option value="q">q</option>
+                    <option value="r">r</option>
+                    <option value="s">s</option>
+                    <option value="t">t</option>
+                    <option value="u">u</option>
+                    <option value="v">v</option>
+                    <option value="w">w</option>
+                    <option value="x">x</option>
+                    <option value="y">y</option>
+                    <option value="z">z</option>
+                </select>
+
+                <select name="annee">
+                    <option value="%">-- Filtrer par année --</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                    <option value="2020">2020</option>
+                </select>
+
+                <select name="mois">
+                    <option value="%">-- Filtrer par mois --</option>
+                    <option value="01">Janvier</option>
+                    <option value="02">Février</option>
+                    <option value="03">Mars</option>
+                    <option value="04">Avril</option>
+                    <option value="05">Mai</option>
+                    <option value="06">Juin</option>
+                    <option value="07">Juillet</option>
+                    <option value="08">Août</option>
+                    <option value="09">Septembre</option>
+                    <option value="10">Octobre</option>
+                    <option value="11">Novembre</option>
+                    <option value="12">Décembre</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Voir les utilisateurs</button>
+        </form>
     </div>
 </div>
 
 <?php
-if(isset($_POST['recherche'])){
-    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-    $page = isset($_GET['subpage']) ? (int)$_GET['subpage'] : 1;
-    $recherche = $_POST['search'];
-    $id=$_SESSION['user_id'];
-    if ($page < 1) {
-        $page = 1;
-    }
-    $limit = 4;
-    $offset = ($page - 1) * $limit;
+$mois = $_POST['mois']??'%';
+$annee = $_POST['annee']??'%';
+$lettre = $_POST['lettre']??'%';
 
-    if ($connection_string->connect_error) {
-        echo "Erreur : impossible de se connecter à la base de donnée";
-        exit();
-    }
-    
+if(isset($_POST['recherche'])){
+    [$connection_string, $page, $id, $limit, $offset] = value();
+    $recherche = $_POST['search'];
     $sql = "SELECT * 
         FROM administrateur 
         WHERE id != ? AND  (prenom = ? OR nom = ?) AND statut !='administrateur'
         ORDER BY id
         LIMIT $limit OFFSET $offset";
+
     $prepared_stmt = $connection_string->prepare($sql);
     $prepared_stmt->bind_param('iss', $id, $recherche,$recherche);
     $prepared_stmt->execute();
     $result = $prepared_stmt->get_result();
 
-    if ($result->num_rows === 0) {
-        echo "<div class='alert alert-error'>Aucun utilisateur ne posséde ce nom</div>";
-    } else {
-        while ($row = $result->fetch_assoc()) {
-            affichage_user($row);
-        }
-    }
+    affichage($result);
 
     $totalUser = $connection_string->query("SELECT COUNT(*) FROM administrateur WHERE id !=$id AND (prenom = '$recherche' OR nom = '$recherche') AND statut !='administrateur'")->fetch_row()[0];
-    $totalPages = ceil($totalUser / $limit);
-    for ($i = 1; $i <= $totalPages; $i++) {
-        if ($i == $page) {
-            echo ' ';
-            echo '<strong>' . $i . '</strong> ';
-        } else {
-            echo ' ';
-            echo '<a href="index.php?page=profil_administrateur&subpage=' . $i .'">' . $i .'</a>';
-        }
-    }
-
-    $prepared_stmt->close();
-    $connection_string->close();
-
-}elseif(isset($_POST['reset'])) {
-    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-    $page = isset($_GET['subpage']) ? (int)$_GET['subpage'] : 1;
-    $id=$_SESSION['user_id'];
-    if ($page < 1) {
-        $page = 1;
-    }
-    $limit = 4;
-    $offset = ($page - 1) * $limit;
-
-    if ($connection_string->connect_error) {
-        echo "Erreur : impossible de se connecter à la base de donnée";
-        exit();
-    }
     
-    $sql = "SELECT * 
-            FROM administrateur 
-            WHERE id != $id AND statut !='administrateur'
-            ORDER BY id
-            LIMIT $limit OFFSET $offset";
-    $prepared_stmt = $connection_string->prepare($sql);
-    $prepared_stmt->execute();
-    $result = $prepared_stmt->get_result();
+    affichage_numero($totalUser, $limit, $page);
 
-    if ($result->num_rows === 0) {
-            echo "Aucun utilisateur trouvé";
-            exit();
-        } else {
-            while ($row = $result->fetch_assoc()) {
-                affichage_user($row);
-            }
-        }
-    $totalUser = $connection_string->query("SELECT COUNT(*) FROM administrateur WHERE id !=$id AND statut !='administrateur'")->fetch_row()[0];
-    $totalPages = ceil($totalUser / $limit);
-    for ($i = 1; $i <= $totalPages; $i++) {
-        if ($i == $page) {
-            echo ' ';
-            echo '<strong>' . $i . '</strong> ';
-        } else {
-            echo ' ';
-            echo '<a href="index.php?page=profil_administrateur&subpage=' . $i .'">' . $i .'</a>';
-        }
-    }
-
-    $prepared_stmt->close();
-    $connection_string->close();
+    close($prepared_stmt,$connection_string);
 }else{
-    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-    $page = isset($_GET['subpage']) ? (int)$_GET['subpage'] : 1;
-    $id=$_SESSION['user_id'];
-    if ($page < 1) {
-        $page = 1;
-    }
-    $limit = 4;
-    $offset = ($page - 1) * $limit;
-
-    if ($connection_string->connect_error) {
-        echo "Erreur : impossible de se connecter à la base de donnée";
-        exit();
-    }
-    
+    [$connection_string, $page, $id, $limit, $offset] = value();   
     $sql = "SELECT * 
             FROM administrateur 
-            WHERE id != $id AND statut !='administrateur'
+            WHERE id != $id 
+            AND statut !='administrateur'
+            AND nom LIKE '$lettre%'
+            AND `date` LIKE '%-$mois-%' AND `date` LIKE '$annee-%'
             ORDER BY id
             LIMIT $limit OFFSET $offset";
     $prepared_stmt = $connection_string->prepare($sql);
     $prepared_stmt->execute();
     $result = $prepared_stmt->get_result();
 
-    if ($result->num_rows === 0) {
-            echo "Aucun utilisateur trouvé";
-            exit();
-        } else {
-            while ($row = $result->fetch_assoc()) {
-                affichage_user($row);
-            }
-        }
-    $totalUser = $connection_string->query("SELECT COUNT(*) FROM administrateur WHERE id !=$id AND statut !='administrateur'")->fetch_row()[0];
-    $totalPages = ceil($totalUser / $limit);
-    for ($i = 1; $i <= $totalPages; $i++) {
-        if ($i == $page) {
-            echo ' ';
-            echo '<strong>' . $i . '</strong> ';
-        } else {
-            echo ' ';
-            echo '<a href="index.php?page=profil_administrateur&subpage=' . $i .'">' . $i .'</a>';
-        }
-    }
+    affichage($result);
+    $totalUser = $connection_string->query("SELECT COUNT(*) 
+    FROM administrateur 
+    WHERE id !=$id 
+    AND statut !='administrateur'
+    AND nom LIKE '$lettre%'
+    AND `date` LIKE '%-$mois-%' AND `date` LIKE '$annee-%'
+    ORDER BY id")->fetch_row()[0];
+    affichage_numero($totalUser, $limit, $page);
 
-    $prepared_stmt->close();
-    $connection_string->close();
+    close($prepared_stmt,$connection_string);
 }
 ?>
-
-
-
-
-
-
-
-
-
-
-
-
 
 <style>
 :root {

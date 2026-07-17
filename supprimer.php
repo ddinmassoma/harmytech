@@ -11,10 +11,10 @@ if (!isset($_SESSION['user_id'])) {
 <h1>Supprimer un produit</h1>
 
 <?php
+$connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+$id = $_GET['id'];
+$sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
 if (isset($_GET['id'])) {
-    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-    $id = $_GET['id'];
-    $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
     $prepared_stmt = $connection_string->prepare($sql);
     $prepared_stmt->bind_param('i', $id);
     $prepared_stmt->execute();
@@ -26,52 +26,50 @@ if (isset($_GET['id'])) {
     }
 
     if (isset($_POST['supprimer'])) {
-    $id = $_GET['id'];
-    $sql = "DELETE FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
-    $prepared_stmt = $connection_string->prepare($sql);
-    $prepared_stmt->bind_param('i', $id);
-    if ($prepared_stmt->execute() === true) {
-        echo "<p class='alert alert-success'>Produit supprimer avec succés</p>";
-        echo "<a href='index.php?page=accueil' class='btn-card btn-card-back'>";
-            echo "Retour à l'accueil";
-        echo "</a>";
-    } else {
-        echo "<p class='alert alert-error'>Erreur lors de la suppression du produit.</p>";
-        echo "<a href='index.php?page=accueil' class='btn-card btn-card-back'>";
-            echo "Retour à l'accueil";
-        echo "</a>";
-    }
-    $prepared_stmt->close();
-    $connection_string->close();
+        $prepared_stmt = $connection_string->prepare($sql);
+        $prepared_stmt->bind_param('i', $id);
+        if ($prepared_stmt->execute() === true) {
+            echo "<p class='alert alert-success'>Produit supprimer avec succés</p>";
+            echo "<a href='index.php?page=accueil' class='btn-card btn-card-back'>";
+                echo "Retour à l'accueil";
+            echo "</a>";
+        } else {
+            echo "<p class='alert alert-error'>Erreur lors de la suppression du produit.</p>";
+            echo "<a href='index.php?page=accueil' class='btn-card btn-card-back'>";
+                echo "Retour à l'accueil";
+            echo "</a>";
+        }
+        $prepared_stmt->close();
+        $connection_string->close();
     } else{
-            echo "<div class='product-card'>";
-                echo "<div class='product-body'>";
-                    echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) . "</h3>";
-                    
-                    echo "<div class='product-info-grid'>";
-                        echo "<div class='info-item'><span>Marque :</span> <strong>" . htmlspecialchars($row['marque']) . "</strong></div>";
-                        echo "<div class='info-item'><span>Modèle :</span> <strong>" . htmlspecialchars($row['model']) . "</strong></div>";
-                        echo "<div class='info-item'><span>Couleur :</span> <strong>" . htmlspecialchars($row['couleur']) . "</strong></div>";
-                        echo "<div class='info-item'><span>Mémoire :</span> <strong>" . htmlspecialchars($row['memoire']) . "</strong></div>";
-                        echo "<div class='info-item'><span>Référence :</span> <code class='product-ref'>" . htmlspecialchars($row['reference']) . "</code></div>";
-                    echo "</div>";
-                    echo "<span class='product-id-badge'>ID: " . $row['id'] . "</span>";
-                echo "</div>";
-
-                echo "<p class='alert alert-advetissement'>Êtes-vous sûr de vouloir supprimer ce produit ?</p>"."<br/>";
+        echo "<div class='product-card'>";
+            echo "<div class='product-body'>";
+                echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) . "</h3>";
                 
-                echo "<div class='product-footer'>";
-                    echo "<a href='index.php?page=accueil' class='btn-card btn-card-back'>";
-                        echo "Retour à l'accueil";
-                    echo "</a>";
-                    echo"<form action='' method='post'>";
-                        echo"<button type='submit' name='supprimer' class='btn-form btn-form-submit'>Supprimer le produit</button>";
-                    echo "</form>";
+                echo "<div class='product-info-grid'>";
+                    echo "<div class='info-item'><span>Marque :</span> <strong>" . htmlspecialchars($row['marque']) . "</strong></div>";
+                    echo "<div class='info-item'><span>Modèle :</span> <strong>" . htmlspecialchars($row['model']) . "</strong></div>";
+                    echo "<div class='info-item'><span>Couleur :</span> <strong>" . htmlspecialchars($row['couleur']) . "</strong></div>";
+                    echo "<div class='info-item'><span>Mémoire :</span> <strong>" . htmlspecialchars($row['memoire']) . "</strong></div>";
+                    echo "<div class='info-item'><span>Référence :</span> <code class='product-ref'>" . htmlspecialchars($row['reference']) . "</code></div>";
                 echo "</div>";
+                echo "<span class='product-id-badge'>ID: " . $row['id'] . "</span>";
             echo "</div>";
+
+            echo "<p class='alert alert-advetissement'>Êtes-vous sûr de vouloir supprimer ce produit ?</p>"."<br/>";
+            
+            echo "<div class='product-footer'>";
+                echo "<a href='index.php?page=accueil' class='btn-card btn-card-back'>";
+                    echo "Retour à l'accueil";
+                echo "</a>";
+                echo"<form action='' method='post'>";
+                    echo"<button type='submit' name='supprimer' class='btn-form btn-form-submit'>Supprimer le produit</button>";
+                echo "</form>";
+            echo "</div>";
+        echo "</div>";
     }
 }else {
-    echo "Aucun produit trouvé.";
+    echo "<p class='alert alert-error'>Aucun produit trouvé.</p>";
 }
 ?>
 

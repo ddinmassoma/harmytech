@@ -12,22 +12,42 @@ if (!isset($_SESSION['user_id'])) {
 <div class="form-container">
     <h1 class="form-title">Modifier un produit</h1>
 
-    <?php
-    if (isset($_GET['id'])) {
-        $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-        $id = $_GET['id'];
-        $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
-        $prepared_stmt = $connection_string->prepare($sql);
-        $prepared_stmt->bind_param('i', $id);
-        $prepared_stmt->execute();
-        $result = $prepared_stmt->get_result();
-        $row = $result->fetch_assoc();
-        if ($result->num_rows != 1) {
-            header("Location: index.php?page=accueil");
-            exit();   
-        }
+<?php
+$connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+$id = $_GET['id'];
+$nom = $_POST['nom'] ?? '';
+$marque = $_POST['marque'] ?? '';
+$couleur = $_POST['couleur'] ?? '';
+$memoire = $_POST['memoire'] ?? '';
+$model = $_POST['model'] ?? '';
+$reference = $_POST['reference'] ?? '';
+
+if (isset($_GET['id'])) {
+    $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
+    $prepared_stmt = $connection_string->prepare($sql);
+    $prepared_stmt->bind_param('i', $id);
+    $prepared_stmt->execute();
+    $result = $prepared_stmt->get_result();
+    $row = $result->fetch_assoc();
+    if ($result->num_rows != 1) {
+        header("Location: index.php?page=accueil");
+        exit();   
     }
-    ?>
+}
+
+if (isset($_POST['modifier'])) {
+    $sql = "UPDATE base_de_donn__e___harmytech___feuille_1 SET nom = ?, marque = ?, couleur = ?, memoire = ?, model = ?, reference = ? WHERE id = ?";
+    $prepared_stmt = $connection_string->prepare($sql);
+    $prepared_stmt->bind_param('ssssssi', $nom, $marque, $couleur, $memoire, $model, $reference, $id);
+    if ($prepared_stmt->execute() === true) {
+        echo "<p class='alert alert-success'>Produit modifié avec succès.</p>";
+    } else {
+        echo "<p class='alert alert-error'>Erreur lors de la modification du produit.</p>";
+    }
+    $prepared_stmt->close();
+    $connection_string->close();
+}
+?>
     
     <form action="" method="post" class="product-form">
         <div class="form-grid">
@@ -62,30 +82,6 @@ if (!isset($_SESSION['user_id'])) {
         </div>
         
     </form>
-
-    <?php
-    if (isset($_POST['modifier'])) {
-        $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-        $id = $_GET['id'];
-        $nom = $_POST['nom'] ?? '';
-        $marque = $_POST['marque'] ?? '';
-        $couleur = $_POST['couleur'] ?? '';
-        $memoire = $_POST['memoire'] ?? '';
-        $model = $_POST['model'] ?? '';
-        $reference = $_POST['reference'] ?? '';
-
-        $sql = "UPDATE base_de_donn__e___harmytech___feuille_1 SET nom = ?, marque = ?, couleur = ?, memoire = ?, model = ?, reference = ? WHERE id = ?";
-        $prepared_stmt = $connection_string->prepare($sql);
-        $prepared_stmt->bind_param('ssssssi', $nom, $marque, $couleur, $memoire, $model, $reference, $id);
-        if ($prepared_stmt->execute() === true) {
-            echo "<p class='alert alert-success'>Produit modifié avec succès.</p>";
-        } else {
-            echo "<p class='alert alert-error'>Erreur lors de la modification du produit.</p>";
-        }
-        $prepared_stmt->close();
-        $connection_string->close();
-    }
-    ?>
 </div>
 
 
