@@ -1,17 +1,24 @@
 <?php
 if($_SESSION['redirection'] == true){
     header("Location: index.php?page=accueil");
-    exit(); // Toujours mettre un exit() après une redirection header
+    exit();
 }
+
+if (isset($_SESSION['message'])) {
+    echo "<div class='alert alert-success'>" . htmlspecialchars($_SESSION['message']) . "</div>";
+    unset($_SESSION['message']);
+}
+
+require_once 'fonction.php';
 
 if (isset($_POST['connexion'])) {
     $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
     $identifiant = $_POST['identifiant'] ?? '';
     $mot_de_passe = $_POST['mot_de_passe'] ?? '';
 
-    $sql = "SELECT id, statut, mot_de_passe, prenom, nom FROM administrateur WHERE identifiant = ?";       
+    $sql = "SELECT * FROM administrateur WHERE identifiant = ? AND mot_de_passe = ?";       
     $prepared_stmt = $connection_string->prepare($sql);
-    $prepared_stmt->bind_param('s', $identifiant);
+    $prepared_stmt->bind_param('ss', $identifiant, $mot_de_passe);
     $prepared_stmt->execute();
     $result = $prepared_stmt->get_result();
 
@@ -20,8 +27,7 @@ if (isset($_POST['connexion'])) {
         if ($mot_de_passe === $user['mot_de_passe']) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_statut'] = $user['statut'];
-            $_SESSION['nom'] = $user['nom'];
-            $_SESSION['prenom'] = $user['prenom'];
+            historique($user,$connection_string);
             $prepared_stmt->close();
             $connection_string->close();
             header("Location: index.php?page=accueil");
@@ -142,5 +148,12 @@ if (isset($_POST['connexion'])) {
     background-color: #fef2f2;
     color: #991b1b;
     border-color: #ef4444;
+}
+
+/* Alerte Réussite */
+.alert-success {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border-color: #10b981;
 }
 </style>

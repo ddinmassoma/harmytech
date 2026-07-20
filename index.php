@@ -1,6 +1,5 @@
 <?php
 session_start();
-require_once 'configuration/database.php';
 $_SESSION['redirection'] = false;
 if (isset($_SESSION['user_id'])) {
     $page = $_GET['page'] ?? 'accueil'; 
@@ -25,8 +24,12 @@ if (isset($_SESSION['user_id'])) {
                 <?php
                     if (isset($_SESSION['user_id'])) {
                         echo "<a href='deconnexion.php' class='deconnexion'>Se déconnecter</a>";
-                        echo "<a href='index.php?page=profil_administrateur' class='profil'>Gestion des profils</a>";
-                        echo "<a href='index.php?page=accueil' class='accueil'>Accueil</a>";
+                        if($_SESSION['user_statut']=='administrateur'){
+                            echo "<a href='index.php?page=profil_administrateur'>Gestion des profils</a>";
+                            echo "<a href='index.php?page=historique'>Historique des connections</a>";
+                        }
+                        echo "<a href='index.php?page=profil'>Profil</a>";
+                        echo "<a href='index.php?page=accueil'>Accueil</a>";
                     }
                 ?>
             </nav>
@@ -64,8 +67,14 @@ if (isset($_SESSION['user_id'])) {
                     case 'supression_utilisateur':
                         include 'supression_utilisateur.php';
                         break;
+                    case 'profil':
+                        include 'profil.php';
+                        break;
+                    case 'historique':
+                        include 'historique.php';
+                        break;
                     default:
-                        include 'configuration/404.php';
+                        include '404.php';
                         break;
                 }
             ?>

@@ -13,81 +13,12 @@ if (isset($_SESSION['message_erreur'])) {
     unset($_SESSION['message_erreur']);
 }
 
-if(isset($POST['reset'])){
-    header('Location : index.php?page=profil_administrateur');
+if(isset($_GET['reset'])){
+    header('Location: index.php?page=profil_administrateur');
+    exit();
 }
 
-function affichage_user($row, $signature){
-    echo "<div class='product-card'>";
-        echo "<div class='product-body'>";
-            echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']).' '.htmlspecialchars($row['prenom'])."</h3>";
-            
-            echo "<div class='product-info-grid'>";
-                echo "<div class='info-item'><span>Identifiant :</span> <strong>" . htmlspecialchars($row['identifiant']) . "</strong></div>";
-                echo "<div class='info-item'><span>E-mail :</span> <strong>" . htmlspecialchars($row['mail']) . "</strong></div>";
-                echo "<div class='info-item'><span>Statut :</span> <strong>" . htmlspecialchars($row['statut']) . "</strong></div>";
-                echo "<div class='info-item'><span>Date de création du profil  :</span> <strong>" . htmlspecialchars($row['date']) . "</strong></div>";
-            echo "</div>";
-            
-            echo "<span class='product-id-badge'>ID: " . $row['id'] . "</span>";
-        echo "</div>";
-        echo "<div class='product-footer'>";
-            echo "<a href='index.php?page=modification_utilisateur&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-edit'>";
-                echo "Modifier le statut";
-            echo "</a>";
-            echo "<a href='index.php?page=supression_utilisateur&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-delete'>";
-                echo "Supprimer l'utilisateur";
-            echo "</a>";
-        echo "</div>";
-    echo "</div>";
-}
-
-function affichage_numero($totalUser, $limit, $page){
-    $totalPages = ceil($totalUser / $limit);
-    for ($i = 1; $i <= $totalPages; $i++) {
-        if ($i == $page) {
-            echo ' ';
-            echo '<strong>' . $i . '</strong> ';
-        } else {
-            echo ' ';
-            echo '<a href="index.php?page=profil_administrateur&subpage=' . $i .'">' . $i .'</a>';
-        }
-    }
-}
-
-function affichage($result){
-    if ($result->num_rows === 0) {
-        echo "<div class='alert alert-error'>Aucun utilisateur trouvé</div>";
-    } else {
-        while ($row = $result->fetch_assoc()) {
-            $secret = "une_cle_secrete_tres_longue_et_complexe_cote_serveur";
-            $signature = hash_hmac('sha256', $row['id'], $secret);
-            affichage_user($row,$signature);
-        }
-    }
-}
-
-function close($prepared_stmt,$connection_string){
-    $prepared_stmt->close();
-    $connection_string->close();
-}
-
-function value(){
-    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-    $page = isset($_GET['subpage']) ? (int)$_GET['subpage'] : 1;
-    $id=$_SESSION['user_id'];
-    if ($page < 1) {
-        $page = 1;
-    }
-    $limit = 4;
-    $offset = ($page - 1) * $limit;
-    if ($connection_string->connect_error) {
-        echo "<div class='alert alert-error'>Erreur : impossible de se connecter à la base de donnée</div>";
-        exit();
-    }
-
-    return [$connection_string, $page, $id, $limit, $offset];
-}
+require_once 'fonction.php';
 ?>
 
 <h1>Gestion des profils </h1>
@@ -100,7 +31,7 @@ function value(){
     </div>
 
     <div class="search-filter-bar">
-        <form action="" method="post" class="search-form">
+        <form action="" method="get" class="search-form">
             <input type="hidden" name="page" value="profil_administrateur">
             <input 
                 type="text" 
@@ -110,7 +41,7 @@ function value(){
             <button type="submit" name="reset" class="btn btn-primary">Reset</button>
         </form>
 
-        <form method="post" action="" class="filter-form">
+        <form method="get" action="" class="filter-form">
             <input type="hidden" name="page" value="profil_administrateur">
              
             <div class="select-wrapper">
@@ -176,15 +107,14 @@ function value(){
         </form>
     </div>
 </div>
-
 <?php
-$mois = $_POST['mois']??'%';
-$annee = $_POST['annee']??'%';
-$lettre = $_POST['lettre']??'%';
+$mois = $_GET['mois']??'%';
+$annee = $_GET['annee']??'%';
+$lettre = $_GET['lettre']??'%';
 [$connection_string, $page, $id, $limit, $offset] = value();
 
-if(isset($_POST['recherche'])){
-    $recherche = $_POST['search'];
+if(isset($_GET['recherche'])){
+    $recherche = $_GET['search'];
     $sql = "SELECT * 
         FROM administrateur 
         WHERE id != ? AND  (prenom = ? OR nom = ?) AND statut !='administrateur'
@@ -198,9 +128,9 @@ if(isset($_POST['recherche'])){
 
     affichage($result);
 
-    $totalUser = $connection_string->query("SELECT COUNT(*) FROM administrateur WHERE id !=$id AND (prenom = '$recherche' OR nom = '$recherche') AND statut !='administrateur'")->fetch_row()[0];
-    
-    affichage_numero($totalUser, $limit, $page);
+    $count_sql = "SELECT COUNT(*) FROM administrateur WHERE id != $id AND (prenom = '$recherche' OR nom = '$recherche') AND statut != 'administrateur'";
+    $totalUser = $connection_string->query($count_sql)->fetch_row()[0];
+    pages($totalUser, $limit, $page);
 
     close($prepared_stmt,$connection_string);
 }else{  
@@ -224,12 +154,11 @@ if(isset($_POST['recherche'])){
     AND nom LIKE '$lettre%'
     AND `date` LIKE '%-$mois-%' AND `date` LIKE '$annee-%'
     ORDER BY id")->fetch_row()[0];
-    affichage_numero($totalUser, $limit, $page);
+    pages($totalUser, $limit, $page);
 
     close($prepared_stmt,$connection_string);
 }
 ?>
-
 <style>
 :root {
     --color-dark-bg: #0b132b;    

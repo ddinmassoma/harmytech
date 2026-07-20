@@ -7,6 +7,8 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: index.php?page=accueil"); 
     exit;
 }
+
+require_once 'fonction.php';
 ?>
 
 <h1>Ajouter un produit</h1>
@@ -32,72 +34,6 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 
 <?php 
-function formulaire($n){
-    $nom = $_GET["nom$n"] ?? '';
-    $marque = $_GET["marque$n"] ?? '';
-    $couleur = $_GET["couleur$n"] ?? '';
-    $memoire = $_GET["memoire$n"] ?? '';
-    $model = $_GET["model$n"] ?? '';
-    $reference = $_GET["reference$n"] ?? '';
-
-    echo "<div class='form-container'>";
-        echo "<h1 class='form-title'>Produit n°". $n ."</h1>";
-        echo "<div class='product-form'>";
-            echo "<div class='form-grid'>";
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='nom$n' placeholder='Nom du produit' value='".htmlspecialchars($nom, ENT_QUOTES)."' required>";
-                echo "</div>";
-                
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='marque$n' placeholder='Marque du produit' value='".htmlspecialchars($marque, ENT_QUOTES)."' required>";
-                echo "</div>";
-                
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='couleur$n' placeholder='Couleur du produit' value='".htmlspecialchars($couleur, ENT_QUOTES)."' required>";
-                echo "</div>";
-                
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='memoire$n' placeholder='Mémoire du produit' value='".htmlspecialchars($memoire, ENT_QUOTES)."' required>";
-                echo "</div>";
-                
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='model$n' placeholder='Modèle du produit' value='".htmlspecialchars($model, ENT_QUOTES)."' required>";
-                echo "</div>";
-                
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='reference$n' placeholder='Référence du produit' value='".htmlspecialchars($reference, ENT_QUOTES)."' required>";
-                echo "</div>";
-            echo "</div>";
-        echo "</div>";
-    echo "</div>";
-}
-
-function ajouter($connection,$marque,$nom,$couleur,$reference,$model,$memoire){
-    $sql = "INSERT INTO base_de_donn__e___harmytech___feuille_1 (nom, marque, couleur, memoire, model, reference) VALUES (?, ?, ?, ?, ?, ?)";
-    $prepared_stmt = $connection->prepare($sql);
-    $prepared_stmt->bind_param('ssssss', $nom, $marque, $couleur, $memoire, $model, $reference);
-    $result=verification($reference, $nom, $connection);
-    if($result->num_rows === 1){
-        echo "<p class='alert alert-error'>Erreur : le nom ou la référence du produit est déjà utilisé.</p>";
-    }else{
-        if ($prepared_stmt->execute() === false) {
-        echo "<p class='alert alert-error'>Erreur lors de l'ajout du produit \"".htmlspecialchars($nom)."\".</p>";
-        } else {
-            echo "<p class='alert alert-success'>Produit \"".htmlspecialchars($nom)."\" ajouté avec succès.</p>";
-            $prepared_stmt->close();
-        }
-    }
-}
-
-function verification($reference, $nom, $connection){
-    $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE reference = ? AND nom = ?";
-    $prepared_stmt = $connection->prepare($sql);
-    $prepared_stmt->bind_param('ss', $reference, $nom);
-    $prepared_stmt->execute();
-    $result = $prepared_stmt->get_result();
-    return $result;
-}
-
 if(isset($_GET['list_ajout'])){
     $nb_produit = isset($_GET['nb_produit']) ? (int)$_GET['nb_produit'] : 1;
     $connection = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
@@ -107,7 +43,7 @@ if(isset($_GET['list_ajout'])){
     echo "<input type='hidden' name='list_ajout' value=''>";
     echo "<input type='hidden' name='nb_produit' value='".$nb_produit."'>";
     for($i=1; $i<=$nb_produit; $i++){
-        formulaire($i);
+        formulaire_ajout_produit($i);
     }
     echo "<div class='form-actions'>";
         echo "<button type='submit' name='ajouter' class='btn-form btn-form-submit'>Ajouter les produits</button>";
@@ -124,7 +60,7 @@ if(isset($_GET['list_ajout'])){
             $model = $_GET['model'.$i] ?? '';
             $reference = $_GET['reference'.$i] ?? ''; 
             if ($marque!='' && $nom!='' && $couleur!='' && $reference!='' && $model!='' && $memoire!=''){
-                ajouter($connection, $marque, $nom, $couleur, $reference, $model, $memoire);
+                ajouter_produit($connection, $marque, $nom, $couleur, $reference, $model, $memoire);
             } 
         }
         $connection->close();
@@ -133,7 +69,7 @@ if(isset($_GET['list_ajout'])){
 } else {
     echo "<form action='' method='get'>";
     echo "<input type='hidden' name='page' value='ajouter'>";   
-    formulaire(1);
+    formulaire_ajout_produit(1);
     echo "<div class='form-actions'>";
         echo "<button type='submit' name='ajouter' class='btn-form btn-form-submit'>Ajouter le produit</button>";
         echo "<a href='index.php?page=accueil' class='btn-form btn-form-back'>Retour à l'accueil</a>";
@@ -149,7 +85,7 @@ if(isset($_GET['list_ajout'])){
         $model = $_GET['model1'] ?? '';
         $reference = $_GET['reference1'] ?? '';
         if ($marque!='' && $nom!='' && $couleur!='' && $reference!='' && $model!='' && $memoire!=''){
-            ajouter($connection, $marque, $nom, $couleur, $reference, $model, $memoire);
+            ajouter_produit($connection, $marque, $nom, $couleur, $reference, $model, $memoire);
         }
         $connection->close();
     }

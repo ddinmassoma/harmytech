@@ -7,6 +7,8 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: index.php?page=accueil"); 
     exit;
 }
+
+require_once 'fonction.php';
 ?>
 
 <h1>Ajouter un utilisateur</h1>
@@ -32,67 +34,6 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 
 <?php 
-function formulaire($n){
-    $nom = $_POST["nom$n"] ?? '';
-    $prenom = $_POST["prenom$n"] ?? '';
-    $identifiant = $_POST["identifiant$n"] ?? '';
-    $mail = $_POST["mail$n"] ?? '';
-    $mot_de_passe = $_POST["mot_de_passe$n"] ?? '';
-
-    echo "<div class='form-container'>";
-        echo "<h1 class='form-title'>Utilisateur n°". $n ."</h1>";
-        echo "<div class='product-form'>";
-            echo "<div class='form-grid'>";
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='nom$n' placeholder='Nom' value='".htmlspecialchars($nom, ENT_QUOTES)."' required>";
-                echo "</div>";
-                
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='prenom$n' placeholder='Prenom' value='".htmlspecialchars($prenom, ENT_QUOTES)."' required>";
-                echo "</div>";
-                
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='identifiant$n' placeholder='identifiant' value='".htmlspecialchars($identifiant, ENT_QUOTES)."' required>";
-                echo "</div>";
-                
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='mail$n' placeholder='E-mail' value='".htmlspecialchars($mail, ENT_QUOTES)."' required>";
-                echo "</div>";
-                
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='mot_de_passe$n' placeholder='Mot de passe' value='".htmlspecialchars($mot_de_passe, ENT_QUOTES)."' required>";
-                echo "</div>";
-            echo "</div>";
-        echo "</div>";
-    echo "</div>";
-}
-
-function ajouter($nom, $prenom, $mail, $identifiant,$mot_de_passe,$connection){
-    $sql = "INSERT INTO administrateur (nom, prenom, mail, identifiant, mot_de_passe) VALUES (?, ?, ?, ?, ?)";
-    $prepared_stmt = $connection->prepare($sql);
-    $prepared_stmt->bind_param('sssss', $nom, $prenom, $mail, $identifiant,$mot_de_passe);
-    $result = verification($mail, $identifiant, $connection);
-    if($result->num_rows === 1){
-        echo "<p class='alert alert-error'>Erreur : l'e-mail ou l'identifiant est déjà utilisé.</p>";
-    }else{
-        if ($prepared_stmt->execute() === false) {
-        echo "<p class='alert alert-error'>Erreur lors de l'ajout de l'utilisateur</p>";
-        } else {
-            echo "<p class='alert alert-success'>Utilisateur ajouté avec succès.</p>";
-            $prepared_stmt->close();
-        }
-    }
-}
-
-function verification($mail, $identifiant, $connection){
-    $sql = "SELECT * FROM administrateur WHERE mail = ? AND identifiant = ?";
-    $prepared_stmt = $connection->prepare($sql);
-    $prepared_stmt->bind_param('ss', $mail, $identifiant);
-    $prepared_stmt->execute();
-    $result = $prepared_stmt->get_result();
-    return $result;
-}
-
 if(isset($_GET['list_user'])){
     $nb_user = isset($_GET['nb_user']) ? (int)$_GET['nb_user'] : 1;
     $connection = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
@@ -102,7 +43,7 @@ if(isset($_GET['list_user'])){
     echo "<input type='hidden' name='list_ajout' value=''>";
     echo "<input type='hidden' name='nb_produit' value='".$nb_user."'>";
     for($i=1; $i<=$nb_user; $i++){
-        formulaire($i);
+        formulaire_ajout_utilisateur($i);
     }
     echo "<div class='form-actions'>";
         echo "<button type='submit' name='ajouter' class='btn-form btn-form-submit'>Ajouter</button>";
@@ -118,7 +59,7 @@ if(isset($_GET['list_user'])){
             $mail = $_POST["mail$i"] ?? '';
             $mot_de_passe = $_POST["mot_de_passe$i"] ?? ''; 
             if ($prenom!='' && $nom!='' && $mail!='' && $identifiant!='' && $mot_de_passe!='' && $connection!=''){
-                ajouter($nom, $prenom, $mail, $identifiant, $mot_de_passe, $connection);
+                ajouter_ajout_utilisateur($nom, $prenom, $mail, $identifiant, $mot_de_passe, $connection);
             } 
         }
         $connection->close();
@@ -128,7 +69,7 @@ if(isset($_GET['list_user'])){
     $connection = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
     echo "<form action='' method='post'>";
     echo "<input type='hidden' name='page' value='ajout_utilisateur'>";   
-    formulaire(1);
+    formulaire_ajout_utilisateur(1);
     echo "<div class='form-actions'>";
         echo "<button type='submit' name='ajouter' class='btn-form btn-form-submit'>Ajouter</button>";
         echo "<a href='index.php?page=profil_administrateur' class='btn-form btn-form-back'>Retour</a>";
@@ -142,7 +83,7 @@ if(isset($_GET['list_user'])){
             $mail = $_POST["mail1"] ?? '';
             $mot_de_passe = $_POST["mot_de_passe1"] ?? ''; 
             if ($prenom!='' && $nom!='' && $mail!='' && $identifiant!='' && $mot_de_passe!='' && $connection!=''){
-                ajouter($nom, $prenom, $mail, $identifiant, $mot_de_passe, $connection);
+                ajouter_ajout_utilisateur($nom, $prenom, $mail, $identifiant, $mot_de_passe, $connection);
             } 
         $connection->close();
     }

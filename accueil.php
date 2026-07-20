@@ -9,108 +9,12 @@ if (isset($_SESSION['message_erreur'])) {
     unset($_SESSION['message_erreur']);
 }
 
-if(isset($POST['reset'])){
-    header('Location : index.php?page=accueil');
+if(isset($_GET['reset'])){
+    header('Location: index.php?page=accueil');
+    exit();
 }
 
-function value(){
-    $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-    $page = isset($_GET['subpage']) ? (int)$_GET['subpage'] : 1;
-    $id=$_SESSION['user_id'];
-    if ($page < 1) {
-        $page = 1;
-    }
-    $limit = 4;
-    $offset = ($page - 1) * $limit;
-    if ($connection_string->connect_error) {
-        echo "<div class='alert alert-error'>Erreur : impossible de se connecter à la base de donnée</div>";
-        exit();
-    }
-
-    return [$connection_string, $page, $id, $limit, $offset];
-}
-
-function pages($totalArticles, $limit, $page){
-    $totalPages = ceil($totalArticles / $limit);
-        for ($i = 1; $i <= $totalPages; $i++) {
-            if ($i == $page) {
-                echo ' ';
-                echo '<strong>' . $i . '</strong> ';
-            } else {
-                echo ' ';
-                echo '<a href="index.php?page=accueil&subpage=' . $i .'">' . $i .'</a>';
-            }
-        }
-}
-
-function close($prepared_stmt,$connection_string){
-    $prepared_stmt->close();
-    $connection_string->close();
-}
-
-function sql($limit, $offset, $couleur, $marque, $memoire){
-    if(isset($_GET['submit'])){
-        $sql = "SELECT * 
-                FROM base_de_donn__e___harmytech___feuille_1 
-                WHERE nom LIKE ? 
-                ORDER BY id
-                LIMIT $limit OFFSET $offset";
-    }elseif($couleur =="autre"){
-        $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 
-            WHERE marque LIKE '%$marque%' 
-            AND couleur NOT IN ('noir', 'blanc', 'gris', 'rouge', 'bleu', 'vert', 'jaune', 'violet', 'rose', 'orange')
-            AND couleur LIKE '%$couleur%' 
-            AND memoire LIKE '%$memoire%'
-            ORDER BY id
-            LIMIT $limit OFFSET $offset";
-    }else{
-        $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 
-            WHERE marque LIKE '%$marque%' 
-            AND couleur LIKE '%$couleur%' 
-            AND memoire LIKE '%$memoire%'
-            ORDER BY id
-            LIMIT $limit OFFSET $offset";
-    }
-    return $sql;
-} 
-
-function affichage_produit($row,$signature){
-    echo "<div class='product-card'>";
-        echo "<div class='product-body'>";
-            echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) . "</h3>";
-            
-            echo "<div class='product-info-grid'>";
-                echo "<div class='info-item'><span>Marque :</span> <strong>" . htmlspecialchars($row['marque']) . "</strong></div>";
-                echo "<div class='info-item'><span>Modèle :</span> <strong>" . htmlspecialchars($row['model']) . "</strong></div>";
-                echo "<div class='info-item'><span>Couleur :</span> <strong>" . htmlspecialchars($row['couleur']) . "</strong></div>";
-                echo "<div class='info-item'><span>Mémoire :</span> <strong>" . htmlspecialchars($row['memoire']) . "</strong></div>";
-                echo "<div class='info-item'><span>Référence :</span> <code class='product-ref'>" . htmlspecialchars($row['reference']) . "</code></div>";
-            echo "</div>";
-            
-            echo "<span class='product-id-badge'>ID: " . $row['id'] . "</span>";
-        echo "</div>";
-        echo "<div class='product-footer'>";
-            echo "<a href='index.php?page=modifier&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-edit'>";
-                echo "Modifier";
-            echo "</a>";
-            echo "<a href='index.php?page=supprimer&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-delete'>";
-                echo "Supprimer";
-            echo "</a>";
-        echo "</div>";
-    echo "</div>";
-}
-
-function affichage($result){
-    if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $secret = "une_cle_secrete_tres_longue_et_complexe_cote_serveur";
-                $signature = hash_hmac('sha256', $row['id'], $secret);
-                affichage_produit($row,$signature);
-            }
-        } else {
-            echo "<div class='alert alert-error'>Aucun produit trouvé</div>";
-        }
-}
+require_once 'fonction.php';
 ?>
 
 <div class="catalog-container">
@@ -188,26 +92,38 @@ $memoire = $_GET['memoire']??'';
         $searchString = mysqli_real_escape_string($connection_string, trim(htmlentities($_GET['search'] ?? '')));
         $searchString = "%$searchString%";
         
-        $sql = sql($limit, $offset, $couleur, $marque, $memoire);
+        $sql = sql_accueil($limit, $offset, $couleur, $marque, $memoire);
         $prepared_stmt = $connection_string->prepare($sql);
         $prepared_stmt->bind_param('s', $searchString);
         $prepared_stmt->execute();
         $result = $prepared_stmt->get_result();
 
-        affichage($result);
+        affichage_accueil($result);
 
         $totalArticles = $connection_string->query("SELECT COUNT(*) FROM base_de_donn__e___harmytech___feuille_1 WHERE nom LIKE '$searchString'")->fetch_row()[0];
         pages($totalArticles, $limit, $page);
         close($prepared_stmt,$connection_string);
     }else{
         [$connection_string, $page, $id, $limit, $offset] = value();
-        $sql= sql($limit, $offset, $couleur, $marque, $memoire);
+        $sql= sql_accueil($limit, $offset, $couleur, $marque, $memoire);
                 
         $result = $connection_string->query($sql);
 
-        affichage($result);
+        affichage_accueil($result);
 
-        $totalArticles = $connection_string->query("SELECT COUNT(*) FROM base_de_donn__e___harmytech___feuille_1 WHERE marque LIKE '%$marque%' AND couleur LIKE '%$couleur%' AND memoire LIKE '%$memoire%'")->fetch_row()[0];
+        if ($couleur == "autre") {
+            $count_sql = "SELECT COUNT(*) FROM base_de_donn__e___harmytech___feuille_1 
+                          WHERE marque LIKE '%$marque%' 
+                          AND couleur NOT IN ('noir', 'blanc', 'gris', 'rouge', 'bleu', 'vert', 'jaune', 'violet', 'rose', 'orange')
+                          AND couleur LIKE '%$couleur%' 
+                          AND memoire LIKE '%$memoire%'";
+        } else {
+            $count_sql = "SELECT COUNT(*) FROM base_de_donn__e___harmytech___feuille_1 
+                          WHERE marque LIKE '%$marque%' 
+                          AND couleur LIKE '%$couleur%' 
+                          AND memoire LIKE '%$memoire%'";
+        }
+        $totalArticles = $connection_string->query($count_sql)->fetch_row()[0];
         pages($totalArticles, $limit, $page);
         $connection_string->close();
     }

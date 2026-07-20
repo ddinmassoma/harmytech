@@ -204,7 +204,6 @@ $signature_attendue = hash_hmac('sha256', $id_recu, $secret);
             }else{
                 if ($prepared_stmt->execute() === true) {
                     echo "<p class='alert alert-success'>Statut modifié avec succès.</p>";
-                    $row['statut'] = $statut;
                 } else {
                     echo "<p class='alert alert-error'>Erreur lors de la modification du statut.</p>";
                 }

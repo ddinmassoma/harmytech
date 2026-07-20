@@ -57,6 +57,7 @@ if ($signature_attendue!=$signature_recue) {
 $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
 $id = $_GET['id'];
 $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
+$sql_delete ="DELETE FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
 if (isset($_GET['id'])) {
     $prepared_stmt = $connection_string->prepare($sql);
     $prepared_stmt->bind_param('i', $id);
@@ -69,7 +70,7 @@ if (isset($_GET['id'])) {
     }
 
     if (isset($_POST['supprimer'])) {
-        $prepared_stmt = $connection_string->prepare($sql);
+        $prepared_stmt = $connection_string->prepare($sql_delete);
         $prepared_stmt->bind_param('i', $id);
         if ($prepared_stmt->execute() === true) {
             echo "<p class='alert alert-success'>Produit supprimer avec succés</p>";

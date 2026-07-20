@@ -3,20 +3,7 @@ if($_SESSION['redirection']==true){
     header("Location: index.php?page=accueil");
 }
 
-function verification($colonne_sql,$connection,$valeur_unique){
-    $sql = "SELECT $colonne_sql 
-            FROM administrateur 
-            WHERE $colonne_sql = ? "; 
-    $prepared_stmt = $connection->prepare($sql);
-    $prepared_stmt->bind_param('s', $valeur_unique);
-    $prepared_stmt->execute();
-    $result = $prepared_stmt->get_result();
-
-    if ($result->num_rows === 1) {
-        return 'erreur';
-    }
-
-}
+require_once 'fonction.php';
 
 
 if (isset($_POST['création'])){
@@ -28,13 +15,15 @@ if (isset($_POST['création'])){
     $mail = $_POST['e-mail'] ?? '';
 
     $sql = "INSERT INTO administrateur(identifiant, mot_de_passe, prenom, nom, mail) VALUES (?, ?, ?, ?, ?)";
-    if (verification('mail',$connection,$mail)&&verification('identifiant',$connection,$identifiant)=='erreur'){
+    if (verification_creation_compte('mail',$connection,$mail)&&verification_creation_compte('identifiant',$connection,$identifiant)=='erreur'){
         echo "<p class='alert alert-error'>Erreur lors de l'ajout du nouvelle utilisateur : vous avez entrer un identifiant ou e-mail déjà existant.</p>";
     }else{
         $prepared_stmt = $connection->prepare($sql);
         $prepared_stmt->bind_param('sssss', $identifiant, $mot_de_passe, $prenom, $nom, $mail);
         if($prepared_stmt->execute() === true){
-            echo "<p class='alert alert-success'>Utilisateur ajouté avec succès.</p>";
+            $_SESSION['message']="Utilisateur ajouté avec succès";
+            header("Location: index.php?page=connexion");
+            exit();
         }else{
             echo "<p class='alert alert-error'>Erreur lors de l'ajout du nouvelle utilisateur.</p>";
         }
