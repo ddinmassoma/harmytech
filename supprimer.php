@@ -89,7 +89,11 @@ if (isset($_GET['id'])) {
         echo "<div class='product-card'>";
             echo "<div class='product-body'>";
                 echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) . "</h3>";
-                
+                if(filter_var($row['image'], FILTER_VALIDATE_URL) === false) {
+                    echo "<img src ='https://as1.ftcdn.net/jpg/03/34/83/22/220_F_334832255_IMxvzYRygjd20VlSaIAFZrQWjozQH6BQ.jpg' class='product-img' alt='unknow product'>";
+                }else {
+                    echo "<img src ='". $row['image']."' class='product-img' alt='Product image'>";
+                }
                 echo "<div class='product-info-grid'>";
                     echo "<div class='info-item'><span>Marque :</span> <strong>" . htmlspecialchars($row['marque']) . "</strong></div>";
                     echo "<div class='info-item'><span>Modèle :</span> <strong>" . htmlspecialchars($row['model']) . "</strong></div>";
@@ -142,6 +146,19 @@ if (isset($_GET['id'])) {
     display: flex;
     flex-direction: column;
     font-family: 'Segoe UI', sans-serif;
+}
+
+.product-img {
+    width: 140px;
+    height: 140px;         
+    object-fit: contain;
+    border-radius: 8px;
+    display: block;        
+    margin: 15px auto;     
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+    padding: 10px;
 }
 
 /* --- Corps de la carte --- */

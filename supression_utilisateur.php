@@ -39,6 +39,17 @@ $signature_attendue = hash_hmac('sha256', $id_recu, $secret);
     font-family: 'Segoe UI', sans-serif;
 }
 
+.profile-img {
+    width: 120px;          
+    height: 120px;         
+    object-fit: cover;     
+    border-radius: 50%;    
+    display: block;        
+    margin: 15px auto;     
+    border: 3px solid #e2e8f0; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+}
+
 /* --- Corps de la carte --- */
 .product-body {
     padding: 20px;
@@ -237,7 +248,11 @@ if (isset($_GET['id'])) {
             echo "<div class='product-card'>";
                 echo "<div class='product-body'>";
                     echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) .' '. htmlspecialchars($row['prenom']) . "</h3>";
-                    
+                    if($row['statut'] == 'administrateur'){
+                        echo "<img src ='https://thumbs.dreamstime.com/b/ic%C3%B4ne-d-administration-vecteur-homme-utilisateur-profil-avatar-avec-roue-engrenage-pour-r%C3%A9glages-et-configuration-en-couleurs-150138136.jpg?w=576' class='profile-img' alt='Avatar Admin'></img>";
+                    }else{
+                        echo "<img src='https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png' class='profile-img' alt='Avatar User'></img>";
+                    }
                     echo "<div class='product-info-grid'>";
                         echo "<div class='info-item'><span>Identifiant :</span> <strong>" . htmlspecialchars($row['identifiant']) . "</strong></div>";
                         echo "<div class='info-item'><span>E-mail :</span> <strong>" . htmlspecialchars($row['mail']) . "</strong></div>";

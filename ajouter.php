@@ -58,9 +58,10 @@ if(isset($_GET['list_ajout'])){
             $couleur = $_GET['couleur'.$i] ?? '';
             $memoire = $_GET['memoire'.$i] ?? '';
             $model = $_GET['model'.$i] ?? '';
-            $reference = $_GET['reference'.$i] ?? ''; 
-            if ($marque!='' && $nom!='' && $couleur!='' && $reference!='' && $model!='' && $memoire!=''){
-                ajouter_produit($connection, $marque, $nom, $couleur, $reference, $model, $memoire);
+            $reference = $_GET['reference'.$i] ?? '';
+            $image = $_GET['image'.$i] ?? ''; 
+            if ($marque!='' && $nom!='' && $couleur!='' && $reference!='' && $model!='' && $memoire!='' && $image!= ''){
+                ajouter_produit($connection, $marque, $nom, $couleur, $reference, $model, $memoire, $image);
             } 
         }
         $connection->close();
@@ -84,8 +85,9 @@ if(isset($_GET['list_ajout'])){
         $memoire = $_GET['memoire1'] ?? '';
         $model = $_GET['model1'] ?? '';
         $reference = $_GET['reference1'] ?? '';
-        if ($marque!='' && $nom!='' && $couleur!='' && $reference!='' && $model!='' && $memoire!=''){
-            ajouter_produit($connection, $marque, $nom, $couleur, $reference, $model, $memoire);
+        $image = $_GET['image1'] ?? '';
+        if ($marque!='' && $nom!='' && $couleur!='' && $reference!='' && $model!='' && $memoire!='' && $image!=''){
+            ajouter_produit($connection, $marque, $nom, $couleur, $reference, $model, $memoire, $image);
         }
         $connection->close();
     }

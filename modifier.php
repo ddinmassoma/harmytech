@@ -64,6 +64,7 @@ $couleur = $_POST['couleur'] ?? '';
 $memoire = $_POST['memoire'] ?? '';
 $model = $_POST['model'] ?? '';
 $reference = $_POST['reference'] ?? '';
+$image = $_POST['image'] ?? '';
 
 if (isset($_GET['id'])) {
     $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
@@ -79,9 +80,9 @@ if (isset($_GET['id'])) {
 }
 
 if (isset($_POST['modifier'])) {
-    $sql = "UPDATE base_de_donn__e___harmytech___feuille_1 SET nom = ?, marque = ?, couleur = ?, memoire = ?, model = ?, reference = ? WHERE id = ?";
+    $sql = "UPDATE base_de_donn__e___harmytech___feuille_1 SET nom = ?, marque = ?, couleur = ?, memoire = ?, model = ?, reference = ?, `image` = ? WHERE id = ?";
     $prepared_stmt = $connection_string->prepare($sql);
-    $prepared_stmt->bind_param('ssssssi', $nom, $marque, $couleur, $memoire, $model, $reference, $id);
+    $prepared_stmt->bind_param('sssssssi', $nom, $marque, $couleur, $memoire, $model, $reference, $image, $id);
     if ($prepared_stmt->execute() === true) {
         echo "<p class='alert alert-success'>Produit modifié avec succès.</p>";
     } else {
@@ -116,6 +117,10 @@ if (isset($_POST['modifier'])) {
 
             <div class="input-group">
                 <input type="text" name="reference" class="input-group" value="<?php echo isset($row['reference']) ? htmlspecialchars($row['reference']) : ''; ?>">
+            </div>
+
+            <div class="input-group">
+                <input type="text" name="image" class="input-group" value="<?php echo isset($row['image']) ? htmlspecialchars($row['image']) : ''; ?>">
             </div>
         </div>
 

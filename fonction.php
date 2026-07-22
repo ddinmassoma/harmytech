@@ -71,9 +71,9 @@ function affichage_produit($row,$signature){
     echo "<div class='product-card'>";
         echo "<div class='product-body'>";
             echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) . "</h3>";
-            if($row['image']=='indisponible'){
+            if(filter_var($row['image'], FILTER_VALIDATE_URL)) {
                 echo "<img src ='https://as1.ftcdn.net/jpg/03/34/83/22/220_F_334832255_IMxvzYRygjd20VlSaIAFZrQWjozQH6BQ.jpg' class='product-img' alt='unknow product'>";
-            }else{
+            }else {
                 echo "<img src ='". $row['image']."' class='product-img' alt='Product image'>";
             }
             echo "<div class='product-info-grid'>";
@@ -179,6 +179,7 @@ function formulaire_ajout_produit($n){
     $memoire = $_GET["memoire$n"] ?? '';
     $model = $_GET["model$n"] ?? '';
     $reference = $_GET["reference$n"] ?? '';
+    $image = $_GET["image$n"] ?? '';
 
     echo "<div class='form-container'>";
         echo "<h1 class='form-title'>Produit n°". $n ."</h1>";
@@ -207,6 +208,10 @@ function formulaire_ajout_produit($n){
                 echo "<div class='input-group'>";
                     echo "<input type='text' name='reference$n' placeholder='Référence du produit' value='".htmlspecialchars($reference, ENT_QUOTES)."' required>";
                 echo "</div>";
+
+                echo "<div class='input-group'>";
+                    echo "<input type='text' name='image$n' placeholder='lien image' value='".htmlspecialchars($image, ENT_QUOTES)."' required>";
+                echo "</div>";
             echo "</div>";
         echo "</div>";
     echo "</div>";
@@ -221,10 +226,10 @@ function verification_produit($reference, $nom, $connection){
     return $result;
 }
 
-function ajouter_produit($connection,$marque,$nom,$couleur,$reference,$model,$memoire){
-    $sql = "INSERT INTO base_de_donn__e___harmytech___feuille_1 (nom, marque, couleur, memoire, model, reference) VALUES (?, ?, ?, ?, ?, ?)";
+function ajouter_produit($connection,$marque,$nom,$couleur,$reference,$model,$memoire,$image){
+    $sql = "INSERT INTO base_de_donn__e___harmytech___feuille_1 (nom, marque, couleur, memoire, model, reference, `image`) VALUES (?, ?, ?, ?, ?, ?, ?)";
     $prepared_stmt = $connection->prepare($sql);
-    $prepared_stmt->bind_param('ssssss', $nom, $marque, $couleur, $memoire, $model, $reference);
+    $prepared_stmt->bind_param('sssssss', $nom, $marque, $couleur, $memoire, $model, $reference, $image);
     $result=verification_produit($reference, $nom, $connection);
     if($result->num_rows === 1){
         echo "<p class='alert alert-error'>Erreur : le nom ou la référence du produit est déjà utilisé.</p>";
