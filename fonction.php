@@ -71,7 +71,7 @@ function affichage_produit($row,$signature){
     echo "<div class='product-card'>";
         echo "<div class='product-body'>";
             echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) . "</h3>";
-            if(filter_var($row['image'], FILTER_VALIDATE_URL)) {
+            if(filter_var($row['image'], FILTER_VALIDATE_URL)===false) {
                 echo "<img src ='https://as1.ftcdn.net/jpg/03/34/83/22/220_F_334832255_IMxvzYRygjd20VlSaIAFZrQWjozQH6BQ.jpg' class='product-img' alt='unknow product'>";
             }else {
                 echo "<img src ='". $row['image']."' class='product-img' alt='Product image'>";
