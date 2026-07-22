@@ -71,7 +71,11 @@ function affichage_produit($row,$signature){
     echo "<div class='product-card'>";
         echo "<div class='product-body'>";
             echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) . "</h3>";
-            
+            if($row['image']=='indisponible'){
+                echo "<img src ='https://as1.ftcdn.net/jpg/03/34/83/22/220_F_334832255_IMxvzYRygjd20VlSaIAFZrQWjozQH6BQ.jpg' class='product-img' alt='unknow product'>";
+            }else{
+                echo "<img src ='". $row['image']."' class='product-img' alt='Product image'>";
+            }
             echo "<div class='product-info-grid'>";
                 echo "<div class='info-item'><span>Marque :</span> <strong>" . htmlspecialchars($row['marque']) . "</strong></div>";
                 echo "<div class='info-item'><span>Modèle :</span> <strong>" . htmlspecialchars($row['model']) . "</strong></div>";
@@ -276,6 +280,11 @@ function affichage_user($row, $signature){
     echo "<div class='product-card'>";
         echo "<div class='product-body'>";
             echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']).' '.htmlspecialchars($row['prenom'])."</h3>";
+            if($row['statut'] == 'administrateur'){
+                echo "<img src ='https://thumbs.dreamstime.com/b/ic%C3%B4ne-d-administration-vecteur-homme-utilisateur-profil-avatar-avec-roue-engrenage-pour-r%C3%A9glages-et-configuration-en-couleurs-150138136.jpg?w=576' class='profile-img' alt='Avatar Admin'></img>";
+            }else{
+                echo "<img src='https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png' class='profile-img' alt='Avatar User'></img>";
+            }
             
             echo "<div class='product-info-grid'>";
                 echo "<div class='info-item'><span>Identifiant :</span> <strong>" . htmlspecialchars($row['identifiant']) . "</strong></div>";
@@ -310,3 +319,34 @@ function affichage($result){
 }
 
 //historique.php
+function affichage_user_historique($row){
+    echo "<div class='product-card'>";
+        echo "<div class='product-body'>";
+            echo "<h3 class='product-title'>" . htmlspecialchars($row['nom_utilisateur']).' '.htmlspecialchars($row['prenom_utilisateur'])."</h3>";
+            if($row['statut_utilisateur'] == 'administrateur'){
+                echo "<img src ='https://thumbs.dreamstime.com/b/ic%C3%B4ne-d-administration-vecteur-homme-utilisateur-profil-avatar-avec-roue-engrenage-pour-r%C3%A9glages-et-configuration-en-couleurs-150138136.jpg?w=576' class='profile-img' alt='Avatar Admin'>";
+            }else{
+                echo "<img src='https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png' class='profile-img' alt='Avatar User'>";
+            }
+            echo "<div class='product-info-grid'>";
+                echo "<div class='info-item'><span>Identifiant :</span> <strong>" . htmlspecialchars($row['identifiant_utilisateur']) . "</strong></div>";
+                echo "<div class='info-item'><span>E-mail :</span> <strong>" . htmlspecialchars($row['mail_utilisateur']) . "</strong></div>";
+                echo "<div class='info-item'><span>Statut :</span> <strong>" . htmlspecialchars($row['statut_utilisateur']) . "</strong></div>";
+                echo "<div class='info-item'><span>Date de création du profil  :</span> <strong>" . htmlspecialchars($row['date_utilisateur']) . "</strong></div>";
+                echo "<div class='info-item'><span>Date de connexion  :</span> <strong>" . htmlspecialchars($row['date']) . "</strong></div>";
+            echo "</div>";
+            
+            echo "<span class='product-id-badge'>ID: " . $row['id_utilisateur'] . "</span>";
+        echo "</div>";
+    echo "</div>";
+}
+
+function affichage_historique($result){
+    if ($result->num_rows === 0) {
+        echo "<div class='alert alert-error'>Aucun utilisateur trouvé</div>";
+    } else {
+        while ($row = $result->fetch_assoc()) {
+            affichage_user_historique($row);
+        }
+    }
+}

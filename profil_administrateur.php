@@ -20,7 +20,6 @@ if(isset($_GET['reset'])){
 
 require_once 'fonction.php';
 ?>
-
 <h1>Gestion des profils </h1>
 <div class="catalog-container">
     
@@ -118,17 +117,17 @@ if(isset($_GET['recherche'])){
     $sql = "SELECT * 
         FROM administrateur 
         WHERE id != ? AND  (prenom = ? OR nom = ?) AND statut !='administrateur'
-        ORDER BY id
+        ORDER BY `date` DESC
         LIMIT $limit OFFSET $offset";
 
     $prepared_stmt = $connection_string->prepare($sql);
-    $prepared_stmt->bind_param('iss', $id, $recherche,$recherche);
+    $prepared_stmt->bind_param('iss', $id, $recherche, $recherche);
     $prepared_stmt->execute();
     $result = $prepared_stmt->get_result();
 
     affichage($result);
 
-    $count_sql = "SELECT COUNT(*) FROM administrateur WHERE id != $id AND (prenom = '$recherche' OR nom = '$recherche') AND statut != 'administrateur'";
+    $count_sql = "SELECT COUNT(*) FROM administrateur WHERE id != $id AND (prenom = '$recherche' OR nom = '$recherche') AND statut != 'administrateur' ORDER BY `date` DESC";
     $totalUser = $connection_string->query($count_sql)->fetch_row()[0];
     pages($totalUser, $limit, $page);
 
@@ -140,7 +139,7 @@ if(isset($_GET['recherche'])){
             AND statut !='administrateur'
             AND nom LIKE '$lettre%'
             AND `date` LIKE '%-$mois-%' AND `date` LIKE '$annee-%'
-            ORDER BY id
+            ORDER BY `date` DESC
             LIMIT $limit OFFSET $offset";
     $prepared_stmt = $connection_string->prepare($sql);
     $prepared_stmt->execute();
@@ -153,7 +152,7 @@ if(isset($_GET['recherche'])){
     AND statut !='administrateur'
     AND nom LIKE '$lettre%'
     AND `date` LIKE '%-$mois-%' AND `date` LIKE '$annee-%'
-    ORDER BY id")->fetch_row()[0];
+    ORDER BY `date` DESC")->fetch_row()[0];
     pages($totalUser, $limit, $page);
 
     close($prepared_stmt,$connection_string);
@@ -285,7 +284,6 @@ if(isset($_GET['recherche'])){
     font-weight: bold;
 }
 
-/* --- La Carte Produit --- */
 .product-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -297,6 +295,17 @@ if(isset($_GET['recherche'])){
     display: flex;
     flex-direction: column;
     font-family: 'Segoe UI', sans-serif;
+}
+
+.profile-img {
+    width: 120px;          
+    height: 120px;         
+    object-fit: cover;     
+    border-radius: 50%;    
+    display: block;        
+    margin: 15px auto;     
+    border: 3px solid #e2e8f0; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
 }
 
 /* --- Corps de la carte --- */

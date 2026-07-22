@@ -270,6 +270,19 @@ $memoire = $_GET['memoire']??'';
     font-family: 'Segoe UI', sans-serif;
 }
 
+.product-img {
+    width: 140px;
+    height: 140px;         
+    object-fit: contain;
+    border-radius: 8px;
+    display: block;        
+    margin: 15px auto;     
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+    padding: 10px;
+}
+
 /* --- Corps de la carte --- */
 .product-body {
     padding: 20px;
