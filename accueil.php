@@ -24,17 +24,16 @@ require_once 'fonction.php';
             <span class="icon">+</span> Ajouter un produit
         </a>
     </div>
+    
+    <div class="search-filter-bar">
+        <form action="" method="get" class="search-form">
+                <input type="text" placeholder="Entrez le nom du produit..." name="search">
+                <button type="submit" name="submit" class="btn btn-primary">Rechercher</button>
+                <button type="submit" name="reset" class="btn btn-primary">Reset</button>
+        </form>
+    </div>
 
     <div class="search-filter-bar">
-        
-        <form action="" method="get" class="search-form">
-            <input 
-                type="text" 
-                placeholder="Entrez le nom du produit..." 
-                name="search">
-            <button type="submit" name="submit" class="btn btn-primary">Rechercher</button>
-            <button type="submit" name="reset" class="btn btn-primary">Reset</button>
-        </form>
 
         <form method="get" action="" class="filter-form">
             <input type="hidden" name="page" value="accueil">
@@ -75,6 +74,12 @@ require_once 'fonction.php';
                     <option value="2To">2 To</option>
                     <option value="inconnue">Autre</option>
                 </select>
+
+                <select name="proprietaire">
+                    <option value="%">-- Sélectionner le statut --</option>
+                    <option value= 1>Avec proprietaire</option>
+                    <option value= 0>Sans proprietaire</option>
+                </select>
             </div>
 
             <button type="submit" class="btn btn-primary">Voir les produits</button>
@@ -85,14 +90,13 @@ require_once 'fonction.php';
 <?php
 $marque = $_GET['marque']??'';
 $couleur =$_GET['couleur']??'';
-$memoire = $_GET['memoire']??'';
-
+$memoire = $_GET['memoire']?? '%';
+$proprietaire = $_GET['proprietaire']??'%';
+[$connection_string, $page, $id, $limit, $offset] = value();
+$searchString = mysqli_real_escape_string($connection_string, trim(htmlentities($_GET['search'] ?? '')));
     if (isset($_GET['submit'])) {
-        [$connection_string, $page, $id, $limit, $offset] = value();
-        $searchString = mysqli_real_escape_string($connection_string, trim(htmlentities($_GET['search'] ?? '')));
-        $searchString = "%$searchString%";
-        
-        $sql = sql_accueil($limit, $offset, $couleur, $marque, $memoire);
+        $searchString = "%$searchString%";   
+        $sql = sql_accueil($limit, $offset, $couleur, $marque, $memoire, $proprietaire);
         $prepared_stmt = $connection_string->prepare($sql);
         $prepared_stmt->bind_param('s', $searchString);
         $prepared_stmt->execute();
@@ -104,8 +108,7 @@ $memoire = $_GET['memoire']??'';
         pages($totalArticles, $limit, $page);
         close($prepared_stmt,$connection_string);
     }else{
-        [$connection_string, $page, $id, $limit, $offset] = value();
-        $sql= sql_accueil($limit, $offset, $couleur, $marque, $memoire);
+        $sql= sql_accueil($limit, $offset, $couleur, $marque, $memoire, $proprietaire);
                 
         $result = $connection_string->query($sql);
 
@@ -116,12 +119,20 @@ $memoire = $_GET['memoire']??'';
                           WHERE marque LIKE '%$marque%' 
                           AND couleur NOT IN ('noir', 'blanc', 'gris', 'rouge', 'bleu', 'vert', 'jaune', 'violet', 'rose', 'orange')
                           AND couleur LIKE '%$couleur%' 
-                          AND memoire LIKE '%$memoire%'";
-        } else {
+                          AND memoire LIKE '%$memoire%'
+                          AND id_proprietaire LIKE '$proprietaire'";
+        } elseif($proprietaire==1){
             $count_sql = "SELECT COUNT(*) FROM base_de_donn__e___harmytech___feuille_1 
                           WHERE marque LIKE '%$marque%' 
                           AND couleur LIKE '%$couleur%' 
-                          AND memoire LIKE '%$memoire%'";
+                          AND memoire LIKE '%$memoire%'
+                          AND id_proprietaire != 0";
+        }else {
+            $count_sql = "SELECT COUNT(*) FROM base_de_donn__e___harmytech___feuille_1 
+                          WHERE marque LIKE '%$marque%' 
+                          AND couleur LIKE '%$couleur%' 
+                          AND memoire LIKE '%$memoire%'
+                          AND id_proprietaire LIKE '$proprietaire'";
         }
         $totalArticles = $connection_string->query($count_sql)->fetch_row()[0];
         pages($totalArticles, $limit, $page);

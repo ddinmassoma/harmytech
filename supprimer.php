@@ -12,6 +12,7 @@ $secret = "une_cle_secrete_tres_longue_et_complexe_cote_serveur";
 $id_recu = $_GET['id'];
 $signature_recue = $_GET['sig'];
 $signature_attendue = hash_hmac('sha256', $id_recu, $secret);
+require_once 'fonction.php';
 ?>
 
 <style>
@@ -54,6 +55,8 @@ if ($signature_attendue!=$signature_recue) {
 ?>
 
 <?php
+// name_user($row, $connection);
+// prenom_user($row, $connection);
 $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
 $id = $_GET['id'];
 $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
@@ -86,6 +89,8 @@ if (isset($_GET['id'])) {
         $prepared_stmt->close();
         $connection_string->close();
     } else{
+        $nom=name_user($row,$connection_string);
+        $prenom=prenom_user($row,$connection_string);
         echo "<div class='product-card'>";
             echo "<div class='product-body'>";
                 echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) . "</h3>";
@@ -99,6 +104,7 @@ if (isset($_GET['id'])) {
                     echo "<div class='info-item'><span>Modèle :</span> <strong>" . htmlspecialchars($row['model']) . "</strong></div>";
                     echo "<div class='info-item'><span>Couleur :</span> <strong>" . htmlspecialchars($row['couleur']) . "</strong></div>";
                     echo "<div class='info-item'><span>Mémoire :</span> <strong>" . htmlspecialchars($row['memoire']) . "</strong></div>";
+                    echo "<div class='info-item'><span>Nom du propriétaire :</span> <strong>" . htmlspecialchars($nom) ." " . htmlspecialchars($prenom) ."</strong></div>";
                     echo "<div class='info-item'><span>Référence :</span> <code class='product-ref'>" . htmlspecialchars($row['reference']) . "</code></div>";
                 echo "</div>";
                 echo "<span class='product-id-badge'>ID: " . $row['id'] . "</span>";

@@ -41,7 +41,7 @@ function close($prepared_stmt, $connection_string){
 
 
 //accueil.php
-function sql_accueil($limit, $offset, $couleur, $marque, $memoire){
+function sql_accueil($limit, $offset, $couleur, $marque, $memoire, $proprietaire){
     if(isset($_GET['submit'])){
         $sql = "SELECT * 
                 FROM base_de_donn__e___harmytech___feuille_1 
@@ -54,6 +54,23 @@ function sql_accueil($limit, $offset, $couleur, $marque, $memoire){
             AND couleur NOT IN ('noir', 'blanc', 'gris', 'rouge', 'bleu', 'vert', 'jaune', 'violet', 'rose', 'orange')
             AND couleur LIKE '%$couleur%' 
             AND memoire LIKE '%$memoire%'
+            AND id_proprietaire LIKE '$proprietaire'
+            ORDER BY id
+            LIMIT $limit OFFSET $offset";
+    }elseif($proprietaire==1){
+        $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 
+            WHERE marque LIKE '%$marque%' 
+            AND couleur LIKE '%$couleur%' 
+            AND memoire LIKE '%$memoire%'
+            AND id_proprietaire != 0
+            ORDER BY id
+            LIMIT $limit OFFSET $offset";
+    }elseif($proprietaire==0){
+        $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 
+            WHERE marque LIKE '%$marque%' 
+            AND couleur LIKE '%$couleur%' 
+            AND memoire LIKE '%$memoire%'
+            AND id_proprietaire = 0
             ORDER BY id
             LIMIT $limit OFFSET $offset";
     }else{
@@ -61,13 +78,76 @@ function sql_accueil($limit, $offset, $couleur, $marque, $memoire){
             WHERE marque LIKE '%$marque%' 
             AND couleur LIKE '%$couleur%' 
             AND memoire LIKE '%$memoire%'
+            AND id_proprietaire LIKE '$proprietaire'
             ORDER BY id
             LIMIT $limit OFFSET $offset";
     }
     return $sql;
 } 
 
+function name_user($row, $connection) {
+    if (empty($row['id_proprietaire'])) {
+        return "Utilisateur inconnu"; 
+    }
+
+    $id_user = $row['id_proprietaire'];
+    $nom = "Utilisateur inconnu"; 
+
+    $sql_nom = "SELECT nom FROM administrateur WHERE id = ?";
+    
+    if ($stmt = $connection->prepare($sql_nom)) {
+        $stmt->bind_param("i", $id_user);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($data = $result->fetch_assoc()) {
+            $nom = $data['nom'];
+        }
+        $stmt->close();
+    }
+
+    return $nom;
+}
+
+function prenom_user($row, $connection) {
+    if (empty($row['id_proprietaire'])) {
+        return ""; 
+    }
+
+    $id_user = $row['id_proprietaire'];
+    $prenom = "Utilisateur inconnu"; 
+
+    $sql_nom = "SELECT prenom FROM administrateur WHERE id = ?";
+    
+    if ($stmt = $connection->prepare($sql_nom)) {
+        $stmt->bind_param("i", $id_user);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($data = $result->fetch_assoc()) {
+            $prenom = $data['prenom'];
+        }
+        $stmt->close();
+    }
+
+    return $prenom;
+}
+
+function verification_proprietaire($id_proprietaire,$connection){
+    $sql="SELECT * FROM administrateur WHERE id = ?";
+    $stmt = $connection->prepare($sql);
+    $stmt->bind_param("i", $id_proprietaire);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows === 1) {
+        return "connue";
+    }else{
+        return "inconnue";
+    }
+}
+
 function affichage_produit($row,$signature){
+    $connection=new mysqli("127.0.0.1", "root", "", "harmytech_phone");
+    $nom=name_user($row,$connection);
+    $prenom=prenom_user($row,$connection);
     echo "<div class='product-card'>";
         echo "<div class='product-body'>";
             echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) . "</h3>";
@@ -81,6 +161,9 @@ function affichage_produit($row,$signature){
                 echo "<div class='info-item'><span>Modèle :</span> <strong>" . htmlspecialchars($row['model']) . "</strong></div>";
                 echo "<div class='info-item'><span>Couleur :</span> <strong>" . htmlspecialchars($row['couleur']) . "</strong></div>";
                 echo "<div class='info-item'><span>Mémoire :</span> <strong>" . htmlspecialchars($row['memoire']) . "</strong></div>";
+                if($_SESSION['user_statut']=='administrateur'){
+                    echo "<div class='info-item'><span>Nom du propriétaire :</span> <strong>" . htmlspecialchars($nom) ." " . htmlspecialchars($prenom) ."</strong></div>";
+                }
                 echo "<div class='info-item'><span>Référence :</span> <code class='product-ref'>" . htmlspecialchars($row['reference']) . "</code></div>";
             echo "</div>";
             
@@ -99,14 +182,14 @@ function affichage_produit($row,$signature){
 
 function affichage_accueil($result){
     if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $secret = "une_cle_secrete_tres_longue_et_complexe_cote_serveur";
-                $signature = hash_hmac('sha256', $row['id'], $secret);
-                affichage_produit($row,$signature);
-            }
-        } else {
-            echo "<div class='alert alert-error'>Aucun produit trouvé</div>";
+        while ($row = $result->fetch_assoc()) {
+            $secret = "une_cle_secrete_tres_longue_et_complexe_cote_serveur";
+            $signature = hash_hmac('sha256', $row['id'], $secret);
+            affichage_produit($row,$signature);
         }
+    } else {
+        echo "<div class='alert alert-error'>Aucun produit trouvé</div>";
+    }
 }
 
 //ajout_utilisateur.php
@@ -180,6 +263,7 @@ function formulaire_ajout_produit($n){
     $model = $_GET["model$n"] ?? '';
     $reference = $_GET["reference$n"] ?? '';
     $image = $_GET["image$n"] ?? '';
+    $id_proprietaire = $_GET['id_proprietaire$n'] ?? '';
 
     echo "<div class='form-container'>";
         echo "<h1 class='form-title'>Produit n°". $n ."</h1>";
@@ -212,6 +296,10 @@ function formulaire_ajout_produit($n){
                 echo "<div class='input-group'>";
                     echo "<input type='text' name='image$n' placeholder='lien image' value='".htmlspecialchars($image, ENT_QUOTES)."' required>";
                 echo "</div>";
+
+                echo "<div class='input-group'>";
+                    echo "<input type='text' name='id_proprietaire$n' placeholder='ID du proprietaire' value='".htmlspecialchars($id_proprietaire, ENT_QUOTES)."' required>";
+                echo "</div>";
             echo "</div>";
         echo "</div>";
     echo "</div>";
@@ -226,13 +314,16 @@ function verification_produit($reference, $nom, $connection){
     return $result;
 }
 
-function ajouter_produit($connection,$marque,$nom,$couleur,$reference,$model,$memoire,$image){
-    $sql = "INSERT INTO base_de_donn__e___harmytech___feuille_1 (nom, marque, couleur, memoire, model, reference, `image`) VALUES (?, ?, ?, ?, ?, ?, ?)";
+function ajouter_produit($connection,$marque,$nom,$couleur,$reference,$model,$memoire,$image, $id_proprietaire){
+    $sql = "INSERT INTO base_de_donn__e___harmytech___feuille_1 (nom, marque, couleur, memoire, model, reference, `image`, id_proprietaire) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $prepared_stmt = $connection->prepare($sql);
-    $prepared_stmt->bind_param('sssssss', $nom, $marque, $couleur, $memoire, $model, $reference, $image);
+    $prepared_stmt->bind_param('sssssssi', $nom, $marque, $couleur, $memoire, $model, $reference, $image, $id_proprietaire);
     $result=verification_produit($reference, $nom, $connection);
+    $verification_id=verification_proprietaire($id_proprietaire,$connection);
     if($result->num_rows === 1){
         echo "<p class='alert alert-error'>Erreur : le nom ou la référence du produit est déjà utilisé.</p>";
+    }elseif($verification_id==="inconnue"){
+        echo "<p class='alert alert-error'>Erreur : ID inconnue.</p>";
     }else{
         if ($prepared_stmt->execute() === false) {
         echo "<p class='alert alert-error'>Erreur lors de l'ajout du produit \"".htmlspecialchars($nom)."\".</p>";

@@ -12,6 +12,7 @@ $secret = "une_cle_secrete_tres_longue_et_complexe_cote_serveur";
 $id_recu = $_GET['id'];
 $signature_recue = $_GET['sig'];
 $signature_attendue = hash_hmac('sha256', $id_recu, $secret);
+require_once 'fonction.php';
 ?>
 
 <style>
@@ -65,6 +66,7 @@ $memoire = $_POST['memoire'] ?? '';
 $model = $_POST['model'] ?? '';
 $reference = $_POST['reference'] ?? '';
 $image = $_POST['image'] ?? '';
+$id_proprietaire = $_POST['id_proprietaire'] ?? '';
 
 if (isset($_GET['id'])) {
     $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
@@ -80,10 +82,11 @@ if (isset($_GET['id'])) {
 }
 
 if (isset($_POST['modifier'])) {
-    $sql = "UPDATE base_de_donn__e___harmytech___feuille_1 SET nom = ?, marque = ?, couleur = ?, memoire = ?, model = ?, reference = ?, `image` = ? WHERE id = ?";
+    $sql = "UPDATE base_de_donn__e___harmytech___feuille_1 SET nom = ?, marque = ?, couleur = ?, memoire = ?, model = ?, reference = ?, `image` = ?, id_proprietaire = ? WHERE id = ?";
     $prepared_stmt = $connection_string->prepare($sql);
-    $prepared_stmt->bind_param('sssssssi', $nom, $marque, $couleur, $memoire, $model, $reference, $image, $id);
-    if ($prepared_stmt->execute() === true) {
+    $prepared_stmt->bind_param('sssssssii', $nom, $marque, $couleur, $memoire, $model, $reference, $image, $id_proprietaire, $id);
+    $verification = verification_proprietaire($id_proprietaire,$connection_string);
+    if ($prepared_stmt->execute() === true && $verification === 'connue') {
         echo "<p class='alert alert-success'>Produit modifié avec succès.</p>";
     } else {
         echo "<p class='alert alert-error'>Erreur lors de la modification du produit.</p>";
@@ -121,6 +124,10 @@ if (isset($_POST['modifier'])) {
 
             <div class="input-group">
                 <input type="text" name="image" class="input-group" value="<?php echo isset($row['image']) ? htmlspecialchars($row['image']) : ''; ?>">
+            </div>
+
+            <div class="input-group">
+                <input type="text" name="id_proprietaire" class="input-group" value="<?php echo isset($row['id_proprietaire']) ? htmlspecialchars($row['id_proprietaire']) : ''; ?>">
             </div>
         </div>
 

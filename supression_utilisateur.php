@@ -212,6 +212,7 @@ $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
 $id = $_GET['id'];
 $sql = "SELECT * FROM administrateur WHERE id = ?";
 $sql_delete ="DELETE FROM administrateur WHERE id = ?";
+$sql_reset_owner="UPDATE `base_de_donn__e___harmytech___feuille_1` SET id_proprietaire = 0 WHERE id_proprietaire= ?";
 if (isset($_GET['id'])) {
     if($id == $_SESSION['user_id']){
         $_SESSION['message_erreur'] = "Vous ne pouvez pas votre propre profil.";
@@ -231,7 +232,10 @@ if (isset($_GET['id'])) {
     if (isset($_POST['supprimer'])) {
     $prepared_stmt = $connection_string->prepare($sql_delete);
     $prepared_stmt->bind_param('i', $id);
-    if ($prepared_stmt->execute() === true) {
+
+    $owner_stmt = $connection_string->prepare($sql_reset_owner);
+    $owner_stmt->bind_param('i',$id);
+    if ($prepared_stmt->execute() === true && $owner_stmt->execute()=== true) {
         echo "<p class='alert alert-success'>Utilisateur supprimer avec succés</p>";
         echo "<a href='index.php?page=profil_administrateur' class='btn-card btn-card-back'>";
             echo "Retour";
