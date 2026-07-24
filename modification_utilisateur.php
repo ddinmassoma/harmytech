@@ -221,10 +221,6 @@ $signature_attendue = hash_hmac('sha256', $id_recu, $secret);
             <div class="input-group">
                 <input type="text" name="nom" value="<?php echo isset($row['nom']) ? htmlspecialchars($row['nom']) : '';?>" disabled>
             </div>
-
-            <div class="input-group">
-                <input type="text" name="prenom" value="<?php echo isset($row['prenom']) ? htmlspecialchars($row['prenom']) : '';?>" disabled>
-            </div>
             
             <div class="input-group">
                 <input type="text" name="identifiant" class="input-group" value="<?php echo isset($row['identifiant']) ? htmlspecialchars($row['identifiant']) : '';?>" disabled>

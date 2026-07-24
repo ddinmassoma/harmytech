@@ -45,7 +45,8 @@ function sql_accueil($limit, $offset, $couleur, $marque, $memoire, $proprietaire
     if(isset($_GET['submit'])){
         $sql = "SELECT * 
                 FROM base_de_donn__e___harmytech___feuille_1 
-                WHERE nom LIKE ? 
+                WHERE nom LIKE ?
+                AND nom_proprietaire LIKE ? 
                 ORDER BY id
                 LIMIT $limit OFFSET $offset";
     }elseif($couleur =="autre"){
@@ -85,69 +86,24 @@ function sql_accueil($limit, $offset, $couleur, $marque, $memoire, $proprietaire
     return $sql;
 } 
 
-function name_user($row, $connection) {
-    if (empty($row['id_proprietaire'])) {
-        return "Utilisateur inconnu"; 
-    }
-
-    $id_user = $row['id_proprietaire'];
-    $nom = "Utilisateur inconnu"; 
-
-    $sql_nom = "SELECT nom FROM administrateur WHERE id = ?";
-    
-    if ($stmt = $connection->prepare($sql_nom)) {
-        $stmt->bind_param("i", $id_user);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($data = $result->fetch_assoc()) {
-            $nom = $data['nom'];
-        }
-        $stmt->close();
-    }
-
-    return $nom;
-}
-
-function prenom_user($row, $connection) {
-    if (empty($row['id_proprietaire'])) {
-        return ""; 
-    }
-
-    $id_user = $row['id_proprietaire'];
-    $prenom = "Utilisateur inconnu"; 
-
-    $sql_nom = "SELECT prenom FROM administrateur WHERE id = ?";
-    
-    if ($stmt = $connection->prepare($sql_nom)) {
-        $stmt->bind_param("i", $id_user);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($data = $result->fetch_assoc()) {
-            $prenom = $data['prenom'];
-        }
-        $stmt->close();
-    }
-
-    return $prenom;
-}
-
 function verification_proprietaire($id_proprietaire,$connection){
-    $sql="SELECT * FROM administrateur WHERE id = ?";
-    $stmt = $connection->prepare($sql);
-    $stmt->bind_param("i", $id_proprietaire);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result->num_rows === 1) {
+    if($id_proprietaire==0){
         return "connue";
     }else{
-        return "inconnue";
+        $sql="SELECT * FROM administrateur WHERE id = ?";
+        $stmt = $connection->prepare($sql);
+        $stmt->bind_param("i", $id_proprietaire);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows === 1) {
+            return "connue";
+        }else{
+            return "inconnue";
+        }
     }
 }
 
 function affichage_produit($row,$signature){
-    $connection=new mysqli("127.0.0.1", "root", "", "harmytech_phone");
-    $nom=name_user($row,$connection);
-    $prenom=prenom_user($row,$connection);
     echo "<div class='product-card'>";
         echo "<div class='product-body'>";
             echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) . "</h3>";
@@ -162,7 +118,7 @@ function affichage_produit($row,$signature){
                 echo "<div class='info-item'><span>Couleur :</span> <strong>" . htmlspecialchars($row['couleur']) . "</strong></div>";
                 echo "<div class='info-item'><span>Mémoire :</span> <strong>" . htmlspecialchars($row['memoire']) . "</strong></div>";
                 if($_SESSION['user_statut']=='administrateur'){
-                    echo "<div class='info-item'><span>Nom du propriétaire :</span> <strong>" . htmlspecialchars($nom) ." " . htmlspecialchars($prenom) ."</strong></div>";
+                    echo "<div class='info-item'><span>Nom du propriétaire :</span> <strong>" . htmlspecialchars($row['nom_proprietaire']) ."</strong></div>";
                 }
                 echo "<div class='info-item'><span>Référence :</span> <code class='product-ref'>" . htmlspecialchars($row['reference']) . "</code></div>";
             echo "</div>";
@@ -195,7 +151,6 @@ function affichage_accueil($result){
 //ajout_utilisateur.php
 function formulaire_ajout_utilisateur($n){
     $nom = $_POST["nom$n"] ?? '';
-    $prenom = $_POST["prenom$n"] ?? '';
     $identifiant = $_POST["identifiant$n"] ?? '';
     $mail = $_POST["mail$n"] ?? '';
     $mot_de_passe = $_POST["mot_de_passe$n"] ?? '';
@@ -206,10 +161,6 @@ function formulaire_ajout_utilisateur($n){
             echo "<div class='form-grid'>";
                 echo "<div class='input-group'>";
                     echo "<input type='text' name='nom$n' placeholder='Nom' value='".htmlspecialchars($nom, ENT_QUOTES)."' required>";
-                echo "</div>";
-                
-                echo "<div class='input-group'>";
-                    echo "<input type='text' name='prenom$n' placeholder='Prenom' value='".htmlspecialchars($prenom, ENT_QUOTES)."' required>";
                 echo "</div>";
                 
                 echo "<div class='input-group'>";
@@ -237,16 +188,16 @@ function verification_user($mail, $identifiant, $connection){
     return $result;
 }
 
-function ajouter_ajout_utilisateur($nom, $prenom, $mail, $identifiant,$mot_de_passe,$connection){
-    $sql = "INSERT INTO administrateur (nom, prenom, mail, identifiant, mot_de_passe) VALUES (?, ?, ?, ?, ?)";
+function ajouter_ajout_utilisateur($nom, $mail, $identifiant,$mot_de_passe,$connection){
+    $sql = "INSERT INTO administrateur (nom, mail, identifiant, mot_de_passe) VALUES (?, ?, ?, ?)";
     $prepared_stmt = $connection->prepare($sql);
-    $prepared_stmt->bind_param('sssss', $nom, $prenom, $mail, $identifiant,$mot_de_passe);
+    $prepared_stmt->bind_param('ssss', $nom, $mail, $identifiant,$mot_de_passe);
     $result = verification_user($mail, $identifiant, $connection);
     if($result->num_rows === 1){
         echo "<p class='alert alert-error'>Erreur : l'e-mail ou l'identifiant est déjà utilisé.</p>";
     }else{
         if ($prepared_stmt->execute() === false) {
-        echo "<p class='alert alert-error'>Erreur lors de l'ajout de l'utilisateur</p>";
+            echo "<p class='alert alert-error'>Erreur lors de l'ajout de l'utilisateur</p>";
         } else {
             echo "<p class='alert alert-success'>Utilisateur ajouté avec succès.</p>";
             $prepared_stmt->close();
@@ -314,12 +265,23 @@ function verification_produit($reference, $nom, $connection){
     return $result;
 }
 
+function ajouter_name($connection,$id_proprietaire){
+    $sql = "UPDATE `base_de_donn__e___harmytech___feuille_1` AS f
+        JOIN `administrateur` AS a ON f.`id_proprietaire` = a.`id`
+        SET f.`nom_proprietaire` = a.`nom`
+        WHERE f.`id_proprietaire` = ?";
+    $prepared_stmt = $connection->prepare($sql);
+    $prepared_stmt->bind_param('i', $id_proprietaire);
+    $nom = $prepared_stmt->execute();
+    return $nom;
+}
+
 function ajouter_produit($connection,$marque,$nom,$couleur,$reference,$model,$memoire,$image, $id_proprietaire){
     $sql = "INSERT INTO base_de_donn__e___harmytech___feuille_1 (nom, marque, couleur, memoire, model, reference, `image`, id_proprietaire) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $prepared_stmt = $connection->prepare($sql);
     $prepared_stmt->bind_param('sssssssi', $nom, $marque, $couleur, $memoire, $model, $reference, $image, $id_proprietaire);
     $result=verification_produit($reference, $nom, $connection);
-    $verification_id=verification_proprietaire($id_proprietaire,$connection);
+    $verification_id=verification_proprietaire($id_proprietaire, $connection);
     if($result->num_rows === 1){
         echo "<p class='alert alert-error'>Erreur : le nom ou la référence du produit est déjà utilisé.</p>";
     }elseif($verification_id==="inconnue"){
@@ -329,6 +291,7 @@ function ajouter_produit($connection,$marque,$nom,$couleur,$reference,$model,$me
         echo "<p class='alert alert-error'>Erreur lors de l'ajout du produit \"".htmlspecialchars($nom)."\".</p>";
         } else {
             echo "<p class='alert alert-success'>Produit \"".htmlspecialchars($nom)."\" ajouté avec succès.</p>";
+            ajouter_name($connection,$id_proprietaire);
             $prepared_stmt->close();
         }
     }
@@ -337,21 +300,20 @@ function ajouter_produit($connection,$marque,$nom,$couleur,$reference,$model,$me
 //connexion.php
 function historique($user,$connection_string){
     $nom = $user['nom'];
-    $prenom = $user['prenom'];
     $mail = $user['mail'];
     $date = $user['date'];
     $statut = $user['statut'];
     $identifiant = $user['identifiant'];
     $id = $user['id'];
-    $sql = "INSERT INTO historique_connexion (prenom_utilisateur, 
+    $sql = "INSERT INTO historique_connexion ( 
     nom_utilisateur, 
     mail_utilisateur, 
     date_utilisateur,
     statut_utilisateur,
     identifiant_utilisateur,
-    id_utilisateur) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    id_utilisateur) VALUES (?, ?, ?, ?, ?, ?)";
     $prepared_stmt = $connection_string->prepare($sql);
-    $prepared_stmt->bind_param('sssssss', $prenom, $nom, $mail, $date, $statut, $identifiant, $id);
+    $prepared_stmt->bind_param('ssssss', $nom, $mail, $date, $statut, $identifiant, $id);
     $prepared_stmt->execute();
 }
 
@@ -372,10 +334,21 @@ function verification_creation_compte($colonne_sql,$connection,$valeur_unique){
 }
 
 //profil_administrateur.php
+function comptage_reset($connection) {
+    $sql = "UPDATE `administrateur` AS a
+    SET `nb_produit` = (
+    SELECT COUNT(*) 
+    FROM `base_de_donn__e___harmytech___feuille_1` 
+    WHERE `id_proprietaire` = a.`id`)";
+    if ($prepared_stmt = $connection->prepare($sql)) {
+        $prepared_stmt->execute();
+    }
+}
+
 function affichage_user($row, $signature){
     echo "<div class='product-card'>";
         echo "<div class='product-body'>";
-            echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']).' '.htmlspecialchars($row['prenom'])."</h3>";
+            echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']). "</h3>";
             if($row['statut'] == 'administrateur'){
                 echo "<img src ='https://thumbs.dreamstime.com/b/ic%C3%B4ne-d-administration-vecteur-homme-utilisateur-profil-avatar-avec-roue-engrenage-pour-r%C3%A9glages-et-configuration-en-couleurs-150138136.jpg?w=576' class='profile-img' alt='Avatar Admin'></img>";
             }else{
@@ -387,18 +360,21 @@ function affichage_user($row, $signature){
                 echo "<div class='info-item'><span>E-mail :</span> <strong>" . htmlspecialchars($row['mail']) . "</strong></div>";
                 echo "<div class='info-item'><span>Statut :</span> <strong>" . htmlspecialchars($row['statut']) . "</strong></div>";
                 echo "<div class='info-item'><span>Date de création du profil  :</span> <strong>" . htmlspecialchars($row['date']) . "</strong></div>";
+                echo "<div class='info-item'><span>Nombre de produit posséder  :</span> <strong>" . htmlspecialchars($row['nb_produit']) . "</strong></div>";
             echo "</div>";
             
             echo "<span class='product-id-badge'>ID: " . $row['id'] . "</span>";
         echo "</div>";
-        echo "<div class='product-footer'>";
-            echo "<a href='index.php?page=modification_utilisateur&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-edit'>";
-                echo "Modifier le statut";
-            echo "</a>";
-            echo "<a href='index.php?page=supression_utilisateur&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-delete'>";
-                echo "Supprimer l'utilisateur";
-            echo "</a>";
-        echo "</div>";
+            if($row['statut'] == 'utilisateur'){
+                echo "<div class='product-footer'>";
+                    echo "<a href='index.php?page=modification_utilisateur&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-edit'>";
+                        echo "Modifier le statut";
+                    echo "</a>";
+                    echo "<a href='index.php?page=supression_utilisateur&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-delete'>";
+                        echo "Supprimer l'utilisateur";
+                    echo "</a>";
+                echo "</div>";
+            }
     echo "</div>";
 }
 
@@ -418,7 +394,7 @@ function affichage($result){
 function affichage_user_historique($row){
     echo "<div class='product-card'>";
         echo "<div class='product-body'>";
-            echo "<h3 class='product-title'>" . htmlspecialchars($row['nom_utilisateur']).' '.htmlspecialchars($row['prenom_utilisateur'])."</h3>";
+            echo "<h3 class='product-title'>" . htmlspecialchars($row['nom_utilisateur'])."</h3>";
             if($row['statut_utilisateur'] == 'administrateur'){
                 echo "<img src ='https://thumbs.dreamstime.com/b/ic%C3%B4ne-d-administration-vecteur-homme-utilisateur-profil-avatar-avec-roue-engrenage-pour-r%C3%A9glages-et-configuration-en-couleurs-150138136.jpg?w=576' class='profile-img' alt='Avatar Admin'>";
             }else{
@@ -445,4 +421,12 @@ function affichage_historique($result){
             affichage_user_historique($row);
         }
     }
+}
+
+//modifier.php
+function reset_name($connection,$id){
+    $sql="UPDATE `base_de_donn__e___harmytech___feuille_1` SET `nom_proprietaire`='Utilisateur inconnue' WHERE id = ?";
+    $prepared_stmt=$connection->prepare($sql);
+    $prepared_stmt->bind_param('i', $id);
+    $prepared_stmt->execute();
 }

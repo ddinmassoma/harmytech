@@ -11,6 +11,7 @@ $secret = "une_cle_secrete_tres_longue_et_complexe_cote_serveur";
 $id_recu = $_GET['id'];
 $signature_recue = $_GET['sig'];
 $signature_attendue = hash_hmac('sha256', $id_recu, $secret);
+require_once 'fonction.php';
 ?>
 <style>
 :root {
@@ -212,7 +213,7 @@ $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
 $id = $_GET['id'];
 $sql = "SELECT * FROM administrateur WHERE id = ?";
 $sql_delete ="DELETE FROM administrateur WHERE id = ?";
-$sql_reset_owner="UPDATE `base_de_donn__e___harmytech___feuille_1` SET id_proprietaire = 0 WHERE id_proprietaire= ?";
+$sql_reset_owner="UPDATE `base_de_donn__e___harmytech___feuille_1` SET id_proprietaire = 0 , nom_proprietaire = 'Utilisateur inconnue' WHERE id_proprietaire= ?";
 if (isset($_GET['id'])) {
     if($id == $_SESSION['user_id']){
         $_SESSION['message_erreur'] = "Vous ne pouvez pas votre propre profil.";
@@ -251,7 +252,7 @@ if (isset($_GET['id'])) {
     } else{
             echo "<div class='product-card'>";
                 echo "<div class='product-body'>";
-                    echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) .' '. htmlspecialchars($row['prenom']) . "</h3>";
+                    echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) . "</h3>";
                     if($row['statut'] == 'administrateur'){
                         echo "<img src ='https://thumbs.dreamstime.com/b/ic%C3%B4ne-d-administration-vecteur-homme-utilisateur-profil-avatar-avec-roue-engrenage-pour-r%C3%A9glages-et-configuration-en-couleurs-150138136.jpg?w=576' class='profile-img' alt='Avatar Admin'></img>";
                     }else{
@@ -262,6 +263,7 @@ if (isset($_GET['id'])) {
                         echo "<div class='info-item'><span>E-mail :</span> <strong>" . htmlspecialchars($row['mail']) . "</strong></div>";
                         echo "<div class='info-item'><span>Statut :</span> <strong>" . htmlspecialchars($row['statut']) . "</strong></div>";
                         echo "<div class='info-item'><span>Date de création du profil  :</span> <strong>" . htmlspecialchars($row['date']) . "</strong></div>";
+                        echo "<div class='info-item'><span>Nombre de produit posséder  :</span> <strong>" . htmlspecialchars($row['nb_produit']) . "</strong></div>";
                     echo "</div>";
                     echo "<span class='product-id-badge'>ID: " . $row['id'] . "</span>";
                 echo "</div>";

@@ -54,12 +54,11 @@ if(isset($_GET['list_user'])){
     if (isset($_POST['ajouter'])){ 
         for($i=1; $i<=$nb_user; $i++){
             $nom = $_POST["nom$i"] ?? '';
-            $prenom = $_POST["prenom$i"] ?? '';
             $identifiant = $_POST["identifiant$i"] ?? '';
             $mail = $_POST["mail$i"] ?? '';
             $mot_de_passe = $_POST["mot_de_passe$i"] ?? ''; 
-            if ($prenom!='' && $nom!='' && $mail!='' && $identifiant!='' && $mot_de_passe!='' && $connection!=''){
-                ajouter_ajout_utilisateur($nom, $prenom, $mail, $identifiant, $mot_de_passe, $connection);
+            if ($nom!='' && $mail!='' && $identifiant!='' && $mot_de_passe!='' && $connection!=''){
+                ajouter_ajout_utilisateur($nom, $mail, $identifiant, $mot_de_passe, $connection);
             } 
         }
         $connection->close();
@@ -78,12 +77,11 @@ if(isset($_GET['list_user'])){
 
     if (isset($_POST['ajouter'])){ 
             $nom = $_POST["nom1"] ?? '';
-            $prenom = $_POST["prenom1"] ?? '';
             $identifiant = $_POST["identifiant1"] ?? '';
             $mail = $_POST["mail1"] ?? '';
             $mot_de_passe = $_POST["mot_de_passe1"] ?? ''; 
-            if ($prenom!='' && $nom!='' && $mail!='' && $identifiant!='' && $mot_de_passe!='' && $connection!=''){
-                ajouter_ajout_utilisateur($nom, $prenom, $mail, $identifiant, $mot_de_passe, $connection);
+            if ($nom!='' && $mail!='' && $identifiant!='' && $mot_de_passe!='' && $connection!=''){
+                ajouter_ajout_utilisateur($nom, $mail, $identifiant, $mot_de_passe, $connection);
             } 
         $connection->close();
     }

@@ -10,16 +10,15 @@ if (isset($_POST['création'])){
     $connection = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
     $identifiant = $_POST['identifiant'] ?? '';
     $mot_de_passe = $_POST['mot_de_passe'] ?? '';
-    $prenom = $_POST['prenom'] ?? '';
     $nom = $_POST['nom'] ?? '';
     $mail = $_POST['e-mail'] ?? '';
 
-    $sql = "INSERT INTO administrateur(identifiant, mot_de_passe, prenom, nom, mail) VALUES (?, ?, ?, ?, ?)";
-    if (verification_creation_compte('mail',$connection,$mail)&&verification_creation_compte('identifiant',$connection,$identifiant)=='erreur'){
+    $sql = "INSERT INTO administrateur(identifiant, mot_de_passe, nom, mail) VALUES ( ?, ?, ?, ?)";
+    if (verification_creation_compte('mail',$connection,$mail) || verification_creation_compte('identifiant',$connection,$identifiant)=='erreur'){
         echo "<p class='alert alert-error'>Erreur lors de l'ajout du nouvelle utilisateur : vous avez entrer un identifiant ou e-mail déjà existant.</p>";
     }else{
         $prepared_stmt = $connection->prepare($sql);
-        $prepared_stmt->bind_param('sssss', $identifiant, $mot_de_passe, $prenom, $nom, $mail);
+        $prepared_stmt->bind_param('ssss', $identifiant, $mot_de_passe, $nom, $mail);
         if($prepared_stmt->execute() === true){
             $_SESSION['message']="Utilisateur ajouté avec succès";
             header("Location: index.php?page=connexion");
@@ -40,9 +39,6 @@ if (isset($_POST['création'])){
 
     <label>Nom :</label>
     <input type="text" name="nom" autocomplete="nom" placeholder="Entrez votre nom" required>
-
-    <label>Prénom :</label>
-    <input type="text" name="prenom" autocomplete="prenom" placeholder="Entrez votre prénom" required>
 
     <label>E-mail :</label>
     <input type="text" name="e-mail" autocomplete="e-mail" placeholder="Entrez votre email" required>

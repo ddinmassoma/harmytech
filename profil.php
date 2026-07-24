@@ -20,15 +20,14 @@ $prepared_stmt->execute();
 $result = $prepared_stmt->get_result();
 $row = $result->fetch_assoc();
 $nom = $_POST['nom']??'';
-$prenom = $_POST['prenom']??'';
 $identifiant = $_POST['identifiant']??'';
 $mail = $_POST['mail']??'';
 $mot_de_passe = $_POST['mot_de_passe']??'';
 
 if(isset($_POST['modifier'])){
-    $sql = "UPDATE administrateur SET nom = ?, prenom = ?, identifiant = ?, mail = ?, mot_de_passe = ?  WHERE id = ?";
+    $sql = "UPDATE administrateur SET nom = ?, identifiant = ?, mail = ?, mot_de_passe = ?  WHERE id = ?";
     $prepared_stmt = $connection_string->prepare($sql);
-    $prepared_stmt->bind_param('sssssi', $nom, $prenom, $identifiant, $mail, $mot_de_passe, $id);
+    $prepared_stmt->bind_param('ssssi', $nom, $identifiant, $mail, $mot_de_passe, $id);
     if ($prepared_stmt->execute() === true) {
         echo "<p class='alert alert-success'>Modification effectué avec succée.</p>";
     } else {
@@ -57,10 +56,6 @@ if (isset($_POST['supprimer'])){
         <div class="form-grid">
             <div class="input-group">
                 <input type="text" name="nom" value="<?php echo isset($row['nom']) ? htmlspecialchars($row['nom']) : '';?>">
-            </div>
-
-            <div class="input-group">
-                <input type="text" name="prenom" value="<?php echo isset($row['prenom']) ? htmlspecialchars($row['prenom']) : '';?>">
             </div>
             
             <div class="input-group">

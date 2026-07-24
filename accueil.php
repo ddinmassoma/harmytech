@@ -17,6 +17,8 @@ if(isset($_GET['reset'])){
 require_once 'fonction.php';
 ?>
 
+
+<h1>Accueil</h1>
 <div class="catalog-container">
     
     <div class="action-header">
@@ -28,6 +30,11 @@ require_once 'fonction.php';
     <div class="search-filter-bar">
         <form action="" method="get" class="search-form">
                 <input type="text" placeholder="Entrez le nom du produit..." name="search">
+                <?php 
+                    if($_SESSION['user_statut']=='administrateur'){
+                        echo"<input type='text' placeholder='Entrez le nom du propriétaire...' name='search2'>";
+                    }
+                ?>
                 <button type="submit" name="submit" class="btn btn-primary">Rechercher</button>
                 <button type="submit" name="reset" class="btn btn-primary">Reset</button>
         </form>
@@ -88,23 +95,27 @@ require_once 'fonction.php';
 </div>
 
 <?php
-$marque = $_GET['marque']??'';
-$couleur =$_GET['couleur']??'';
+$marque = $_GET['marque']??'%';
+$couleur =$_GET['couleur']??'%';
 $memoire = $_GET['memoire']?? '%';
 $proprietaire = $_GET['proprietaire']??'%';
 [$connection_string, $page, $id, $limit, $offset] = value();
-$searchString = mysqli_real_escape_string($connection_string, trim(htmlentities($_GET['search'] ?? '')));
+$searchString = $_GET['search']??'';
+$searchUser = $_GET['search2']??'';
     if (isset($_GET['submit'])) {
-        $searchString = "%$searchString%";   
+        $searchString = "%$searchString%";
+        $searchUser = "%$searchUser%";
         $sql = sql_accueil($limit, $offset, $couleur, $marque, $memoire, $proprietaire);
         $prepared_stmt = $connection_string->prepare($sql);
-        $prepared_stmt->bind_param('s', $searchString);
+        $prepared_stmt->bind_param('ss', $searchString, $searchUser);
         $prepared_stmt->execute();
         $result = $prepared_stmt->get_result();
-
         affichage_accueil($result);
-
-        $totalArticles = $connection_string->query("SELECT COUNT(*) FROM base_de_donn__e___harmytech___feuille_1 WHERE nom LIKE '$searchString'")->fetch_row()[0];
+        $totalArticles = $connection_string->query("SELECT COUNT(*) 
+            FROM base_de_donn__e___harmytech___feuille_1 
+            WHERE nom LIKE '%$searchString%'
+            AND nom_proprietaire LIKE '$searchUser'
+            ORDER BY id")->fetch_row()[0];
         pages($totalArticles, $limit, $page);
         close($prepared_stmt,$connection_string);
     }else{

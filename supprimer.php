@@ -55,8 +55,6 @@ if ($signature_attendue!=$signature_recue) {
 ?>
 
 <?php
-// name_user($row, $connection);
-// prenom_user($row, $connection);
 $connection_string = new mysqli("127.0.0.1", "root", "", "harmytech_phone");
 $id = $_GET['id'];
 $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
@@ -80,6 +78,8 @@ if (isset($_GET['id'])) {
             echo "<a href='index.php?page=accueil' class='btn-card btn-card-back'>";
                 echo "Retour à l'accueil";
             echo "</a>";
+            reset_name($connection_string,$id);
+            comptage_reset($connection_string);
         } else {
             echo "<p class='alert alert-error'>Erreur lors de la suppression du produit.</p>";
             echo "<a href='index.php?page=accueil' class='btn-card btn-card-back'>";
@@ -89,8 +89,6 @@ if (isset($_GET['id'])) {
         $prepared_stmt->close();
         $connection_string->close();
     } else{
-        $nom=name_user($row,$connection_string);
-        $prenom=prenom_user($row,$connection_string);
         echo "<div class='product-card'>";
             echo "<div class='product-body'>";
                 echo "<h3 class='product-title'>" . htmlspecialchars($row['nom']) . "</h3>";
@@ -104,7 +102,7 @@ if (isset($_GET['id'])) {
                     echo "<div class='info-item'><span>Modèle :</span> <strong>" . htmlspecialchars($row['model']) . "</strong></div>";
                     echo "<div class='info-item'><span>Couleur :</span> <strong>" . htmlspecialchars($row['couleur']) . "</strong></div>";
                     echo "<div class='info-item'><span>Mémoire :</span> <strong>" . htmlspecialchars($row['memoire']) . "</strong></div>";
-                    echo "<div class='info-item'><span>Nom du propriétaire :</span> <strong>" . htmlspecialchars($nom) ." " . htmlspecialchars($prenom) ."</strong></div>";
+                    echo "<div class='info-item'><span>Nom du propriétaire :</span> <strong>" . htmlspecialchars($row['nom_proprietaire']) ."</strong></div>";
                     echo "<div class='info-item'><span>Référence :</span> <code class='product-ref'>" . htmlspecialchars($row['reference']) . "</code></div>";
                 echo "</div>";
                 echo "<span class='product-id-badge'>ID: " . $row['id'] . "</span>";

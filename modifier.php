@@ -68,17 +68,15 @@ $reference = $_POST['reference'] ?? '';
 $image = $_POST['image'] ?? '';
 $id_proprietaire = $_POST['id_proprietaire'] ?? '';
 
-if (isset($_GET['id'])) {
-    $sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
-    $prepared_stmt = $connection_string->prepare($sql);
-    $prepared_stmt->bind_param('i', $id);
-    $prepared_stmt->execute();
-    $result = $prepared_stmt->get_result();
-    $row = $result->fetch_assoc();
-    if ($result->num_rows != 1) {
-        header("Location: index.php?page=accueil");
-        exit();   
-    }
+$sql = "SELECT * FROM base_de_donn__e___harmytech___feuille_1 WHERE id = ?";
+$prepared_stmt = $connection_string->prepare($sql);
+$prepared_stmt->bind_param('i', $id);
+$prepared_stmt->execute();
+$result = $prepared_stmt->get_result();
+$row = $result->fetch_assoc();
+if ($result->num_rows != 1) {
+    header("Location: index.php?page=accueil");
+    exit();   
 }
 
 if (isset($_POST['modifier'])) {
@@ -88,6 +86,11 @@ if (isset($_POST['modifier'])) {
     $verification = verification_proprietaire($id_proprietaire,$connection_string);
     if ($prepared_stmt->execute() === true && $verification === 'connue') {
         echo "<p class='alert alert-success'>Produit modifié avec succès.</p>";
+        ajouter_name($connection_string, $id_proprietaire);
+        comptage_reset($connection_string);
+        if($id_proprietaire==0){
+            reset_name($connection_string,$id);
+        }
     } else {
         echo "<p class='alert alert-error'>Erreur lors de la modification du produit.</p>";
     }

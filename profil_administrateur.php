@@ -39,7 +39,9 @@ require_once 'fonction.php';
             <button type="submit" name="recherche" class="btn btn-primary">Rechercher</button>
             <button type="submit" name="reset" class="btn btn-primary">Reset</button>
         </form>
+    </div>
 
+    <div class="search-filter-bar">
         <form method="get" action="" class="filter-form">
             <input type="hidden" name="page" value="profil_administrateur">
              
@@ -100,6 +102,18 @@ require_once 'fonction.php';
                     <option value="11">Novembre</option>
                     <option value="12">Décembre</option>
                 </select>
+
+                <select name="statut">
+                    <option value="%">-- Filtrer par statut --</option>
+                    <option value="utilisateur">utilisateur</option>
+                    <option value="administrateur">administrateur</option>
+                </select>
+
+                <select name="produit">
+                    <option value="%">-- Filtrer par propriété --</option>
+                    <option value="0">sans produit</option>
+                    <option value="1">avec produit</option>
+                </select>
             </div>
 
             <button type="submit" class="btn btn-primary">Voir les utilisateurs</button>
@@ -110,24 +124,26 @@ require_once 'fonction.php';
 $mois = $_GET['mois']??'%';
 $annee = $_GET['annee']??'%';
 $lettre = $_GET['lettre']??'%';
+$statut = $_GET['statut']??'%';
 [$connection_string, $page, $id, $limit, $offset] = value();
 
 if(isset($_GET['recherche'])){
-    $recherche = $_GET['search'];
+    $recherche = $_GET['search']??'%';
+    $recherche="%$recherche%";
     $sql = "SELECT * 
         FROM administrateur 
-        WHERE id != ? AND  (prenom = ? OR nom = ?) AND statut !='administrateur'
-        ORDER BY `date` DESC
+        WHERE id != ? AND  nom LIKE ? 
+        ORDER BY id
         LIMIT $limit OFFSET $offset";
 
     $prepared_stmt = $connection_string->prepare($sql);
-    $prepared_stmt->bind_param('iss', $id, $recherche, $recherche);
+    $prepared_stmt->bind_param('is', $id, $recherche);
     $prepared_stmt->execute();
     $result = $prepared_stmt->get_result();
 
     affichage($result);
 
-    $count_sql = "SELECT COUNT(*) FROM administrateur WHERE id != $id AND (prenom = '$recherche' OR nom = '$recherche') AND statut != 'administrateur' ORDER BY `date` DESC";
+    $count_sql = "SELECT COUNT(*) FROM administrateur WHERE id != $id AND  nom LIKE '$recherche' ORDER BY id";
     $totalUser = $connection_string->query($count_sql)->fetch_row()[0];
     pages($totalUser, $limit, $page);
 
@@ -135,11 +151,11 @@ if(isset($_GET['recherche'])){
 }else{  
     $sql = "SELECT * 
             FROM administrateur 
-            WHERE id != $id 
-            AND statut !='administrateur'
-            AND nom LIKE '$lettre%'
+            WHERE id != $id
+            AND nom LIKE '%$lettre%'
             AND `date` LIKE '%-$mois-%' AND `date` LIKE '$annee-%'
-            ORDER BY `date` DESC
+            AND statut LIKE '$statut'
+            ORDER BY id
             LIMIT $limit OFFSET $offset";
     $prepared_stmt = $connection_string->prepare($sql);
     $prepared_stmt->execute();
@@ -148,11 +164,11 @@ if(isset($_GET['recherche'])){
     affichage($result);
     $totalUser = $connection_string->query("SELECT COUNT(*) 
     FROM administrateur 
-    WHERE id !=$id 
-    AND statut !='administrateur'
+    WHERE id !=$id
     AND nom LIKE '$lettre%'
     AND `date` LIKE '%-$mois-%' AND `date` LIKE '$annee-%'
-    ORDER BY `date` DESC")->fetch_row()[0];
+    AND statut LIKE '$statut'
+    ORDER BY id")->fetch_row()[0];
     pages($totalUser, $limit, $page);
 
     close($prepared_stmt,$connection_string);

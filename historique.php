@@ -23,7 +23,6 @@ require_once 'fonction.php';
 
 <h1>Historique des connexion</h1>
 <div class="catalog-container">
-
     <div class="search-filter-bar">
         <form action="" method="get" class="search-form">
             <input type="hidden" name="page" value="historique">
@@ -34,6 +33,9 @@ require_once 'fonction.php';
             <button type="submit" name="recherche" class="btn btn-primary">Rechercher</button>
             <button type="submit" name="reset" class="btn btn-primary">Reset</button>
         </form>
+    </div>
+
+    <div class="search-filter-bar">
 
         <form method="get" action="" class="filter-form">
             <input type="hidden" name="page" value="historique">
@@ -117,28 +119,29 @@ $statut = $_GET['statut']??'%';
 
 
 if(isset($_GET['recherche'])){
-    $recherche = $_GET['search']??'';
+    $recherche = $_GET['search']??'%';
+    $recherche="%$recherche%";
     $sql = "SELECT * 
         FROM historique_connexion
-        WHERE prenom_utilisateur = ? OR nom_utilisateur = ?
+        WHERE nom_utilisateur LIKE ?
         ORDER BY `date` DESC
         LIMIT $limit OFFSET $offset";
 
     $prepared_stmt = $connection_string->prepare($sql);
-    $prepared_stmt->bind_param('ss', $recherche, $recherche);
+    $prepared_stmt->bind_param('s', $recherche);
     $prepared_stmt->execute();
     $result = $prepared_stmt->get_result();
 
     affichage_historique($result);
 
-    $count_sql = "SELECT COUNT(*) FROM historique_connexion WHERE prenom_utilisateur = '$recherche' OR nom_utilisateur = '$recherche'";
+    $count_sql = "SELECT COUNT(*) FROM historique_connexion WHERE nom_utilisateur LIKE '$recherche'";
     $totalUser = $connection_string->query($count_sql)->fetch_row()[0];
     pages($totalUser, $limit, $page);
 
     close($prepared_stmt,$connection_string);
 }else{$sql = "SELECT * 
             FROM historique_connexion 
-            WHERE (nom_utilisateur LIKE '$lettre%' OR prenom_utilisateur LIKE '$lettre%')
+            WHERE (nom_utilisateur LIKE '%$lettre%')
             AND `date` LIKE '%-$mois-%' AND `date` LIKE '$annee-%'
             AND statut_utilisateur LIKE '$statut'
             ORDER BY `date` DESC
@@ -150,7 +153,7 @@ if(isset($_GET['recherche'])){
     affichage_historique($result);
     $totalUser = $connection_string->query("SELECT COUNT(*) 
     FROM historique_connexion
-    WHERE (nom_utilisateur LIKE '$lettre%' OR prenom_utilisateur LIKE '$lettre%')
+    WHERE nom_utilisateur LIKE '%$lettre%'
     AND `date` LIKE '%-$mois-%' AND `date` LIKE '$annee-%'
     AND statut_utilisateur LIKE '$statut'
     ORDER BY `date` DESC")->fetch_row()[0];
