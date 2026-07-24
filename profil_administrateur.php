@@ -110,7 +110,7 @@ require_once 'fonction.php';
                 </select>
 
                 <select name="produit">
-                    <option value="%">-- Filtrer par propriété --</option>
+                    <option value="= %">-- Filtrer par propriété --</option>
                     <option value="0">sans produit</option>
                     <option value="1">avec produit</option>
                 </select>
@@ -125,6 +125,7 @@ $mois = $_GET['mois']??'%';
 $annee = $_GET['annee']??'%';
 $lettre = $_GET['lettre']??'%';
 $statut = $_GET['statut']??'%';
+$propriete = $_GET['produit']??'%';
 [$connection_string, $page, $id, $limit, $offset] = value();
 
 if(isset($_GET['recherche'])){
@@ -148,27 +149,51 @@ if(isset($_GET['recherche'])){
     pages($totalUser, $limit, $page);
 
     close($prepared_stmt,$connection_string);
-}else{  
-    $sql = "SELECT * 
+}else{
+    if($propriete==1){
+        $sql = "SELECT * 
             FROM administrateur 
             WHERE id != $id
             AND nom LIKE '%$lettre%'
             AND `date` LIKE '%-$mois-%' AND `date` LIKE '$annee-%'
             AND statut LIKE '$statut'
+            AND nb_produit NOT LIKE 0
             ORDER BY id
             LIMIT $limit OFFSET $offset";
+
+        $totalUser = $connection_string->query("SELECT COUNT(*) 
+            FROM administrateur 
+            WHERE id !=$id
+            AND nom LIKE '$lettre%'
+            AND `date` LIKE '%-$mois-%' AND `date` LIKE '$annee-%'
+            AND statut LIKE '$statut'
+            AND nb_produit NOT LIKE 0
+            ORDER BY id")->fetch_row()[0];
+    }else{
+        $sql = "SELECT * 
+            FROM administrateur 
+            WHERE id != $id
+            AND nom LIKE '%$lettre%'
+            AND `date` LIKE '%-$mois-%' AND `date` LIKE '$annee-%'
+            AND statut LIKE '$statut'
+            AND nb_produit LIKE '$propriete'
+            ORDER BY id
+            LIMIT $limit OFFSET $offset";
+
+        $totalUser = $connection_string->query("SELECT COUNT(*) 
+            FROM administrateur 
+            WHERE id !=$id
+            AND nom LIKE '$lettre%'
+            AND `date` LIKE '%-$mois-%' AND `date` LIKE '$annee-%'
+            AND statut LIKE '$statut'
+            AND nb_produit LIKE '$propriete'
+            ORDER BY id")->fetch_row()[0];
+    }
     $prepared_stmt = $connection_string->prepare($sql);
     $prepared_stmt->execute();
     $result = $prepared_stmt->get_result();
 
     affichage($result);
-    $totalUser = $connection_string->query("SELECT COUNT(*) 
-    FROM administrateur 
-    WHERE id !=$id
-    AND nom LIKE '$lettre%'
-    AND `date` LIKE '%-$mois-%' AND `date` LIKE '$annee-%'
-    AND statut LIKE '$statut'
-    ORDER BY id")->fetch_row()[0];
     pages($totalUser, $limit, $page);
 
     close($prepared_stmt,$connection_string);
@@ -380,44 +405,66 @@ if(isset($_GET['recherche'])){
 
 .product-footer {
     background: #f8fafc;
-    padding: 12px 20px;
+    padding: 12px 16px;
     display: flex;
-    gap: 10px;
-    justify-content: flex-end; /* Aligne les boutons à droite */
+    gap: 8px;
+    justify-content: flex-end;
+    align-items: center;
     border-top: 1px solid #edf2f7;
+    flex-wrap: wrap;
 }
 
-/* Style de base des boutons de carte */
 .btn-card {
-    padding: 8px 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
     text-decoration: none;
-    border-radius: 5px;
+    border-radius: 6px;
+    white-space: nowrap;
     transition: all 0.2s ease;
-    text-align: center;
+    cursor: pointer;
 }
 
-/* Bouton Modifier */
-.btn-card-edit {
-    background-color: var(--color-dark-bg);
+.btn-card svg {
+    flex-shrink: 0;
+}
+
+.btn-card-secondary {
+    background-color: #ffffff;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+.btn-card-secondary:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
+.btn-card-primary {
+    background-color: var(--color-dark-bg, #0f172a);
     color: #ffffff;
+    border: 1px solid transparent;
 }
 
-.btn-card-edit:hover {
-    background-color: #1c2541;
+.btn-card-primary:hover {
+    background-color: #1e293b;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Bouton Supprimer */
-.btn-card-delete {
-    background-color: transparent;
-    color: var(--color-danger);
-    border: 1px solid var(--color-danger);
+.btn-card-danger {
+    background-color: #fef2f2;
+    color: var(--color-danger, #dc2626);
+    border: 1px solid #fecaca;
 }
 
-.btn-card-delete:hover {
-    background-color: var(--color-danger);
+.btn-card-danger:hover {
+    background-color: var(--color-danger, #dc2626);
     color: #ffffff;
+    border-color: transparent;
 }
 
 /* --- Style des Messages d'Alerte (Succès / Erreur) --- */

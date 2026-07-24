@@ -364,14 +364,22 @@ function affichage_user($row, $signature){
             echo "</div>";
             
             echo "<span class='product-id-badge'>ID: " . $row['id'] . "</span>";
-        echo "</div>";
+            echo "</div>";
             if($row['statut'] == 'utilisateur'){
                 echo "<div class='product-footer'>";
-                    echo "<a href='index.php?page=modification_utilisateur&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-edit'>";
+                    echo "<a href='index.php?page=details&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-secondary'>";
+                        // echo "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z'/><circle cx='12' cy='12' r='3'/></svg>";
+                        echo "Détails";
+                    echo "</a>";
+
+                    echo "<a href='index.php?page=modification_utilisateur&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-primary'>";
+                        // echo "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7'/><path d='M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z'/></svg>";
                         echo "Modifier le statut";
                     echo "</a>";
-                    echo "<a href='index.php?page=supression_utilisateur&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-delete'>";
-                        echo "Supprimer l'utilisateur";
+
+                    echo "<a href='index.php?page=supression_utilisateur&id=" . $row['id'] . "&sig=". $signature ."' class='btn-card btn-card-danger'>";
+                        // echo "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><polyline points='3 6 5 6 21 6'/><path d='M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2'/></svg>";
+                        echo "Supprimer";
                     echo "</a>";
                 echo "</div>";
             }
@@ -430,3 +438,5 @@ function reset_name($connection,$id){
     $prepared_stmt->bind_param('i', $id);
     $prepared_stmt->execute();
 }
+
+//details.php

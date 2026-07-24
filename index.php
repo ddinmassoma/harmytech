@@ -73,6 +73,9 @@ if (isset($_SESSION['user_id'])) {
                     case 'historique':
                         include 'historique.php';
                         break;
+                    case 'details':
+                        include 'details.php';
+                        break;
                     default:
                         include '404.php';
                         break;
